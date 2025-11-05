@@ -1,14 +1,6 @@
 
 # 🚗 Intelligent Vehicle Monitoring System (IVMS)
 
-**Developed by Binary Scripters**  
-📍 Rawalpindi, Pakistan  
-📧 contact@binaryscripters.co.uk  
-🌐 [binaryscripters.co.uk](https://binaryscripters.co.uk)  
-📞 +92 334 6724991  
-
----
-
 ## 🧠 Project Overview
 
 **Intelligent Vehicle Monitoring System (IVMS)** is an AI-powered platform that detects vehicle number plates using **YOLOv8 + OCR**, identifies whether the vehicle is **stolen**, and predicts **possible escape routes** using location-based analysis.
@@ -158,10 +150,3 @@ const String BASE_URL = "http://127.0.0.1:8000";
 
 ---
 
-## 🏢 Company Information
-
-**Binary Scripters**  
-📍 Rawalpindi, Pakistan  
-📧 contact@binaryscripters.co.uk  
-🌐 [https://binaryscripters.co.uk](https://binaryscripters.co.uk)  
-📞 +92 334 6724991
