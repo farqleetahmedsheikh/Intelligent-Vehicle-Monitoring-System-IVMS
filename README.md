@@ -149,3 +149,7 @@ const String BASE_URL = "http://127.0.0.1:8000";
 - Cloud deployment (AWS / Railway / Vercel)
 
 ---
+<<<<<<< HEAD
+=======
+
+>>>>>>> afabaa61d9b7fd4e2410b523be95091ab2994df2
