@@ -1,5 +1,5 @@
 /** @format */
-
+import "../styles/Auth.css";
 export default function InputField({ label, type, value, onChange, name }) {
   return (
     <div className="mb-4">
@@ -9,7 +9,6 @@ export default function InputField({ label, type, value, onChange, name }) {
         name={name}
         value={value}
         onChange={onChange}
-        className="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300"
       />
     </div>
   );

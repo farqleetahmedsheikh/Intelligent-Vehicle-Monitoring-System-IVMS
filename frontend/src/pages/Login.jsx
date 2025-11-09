@@ -1,37 +1,55 @@
 /** @format */
 
 import { useState } from "react";
-import { loginUser } from "../api/authApi";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../../api/authApi";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
+import "../styles/Auth.css";
+import AuthLinks from "../components/AuthLinks";
 
 export default function Login() {
-  const [formData, setFormData] = useState({ username: "", password: "" });
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setError("");
     try {
       const res = await loginUser(formData);
-      localStorage.setItem("token", res.data.access);
+      console.log("Login response:", res);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("access", res.data.access);
+      localStorage.setItem("refresh", res.data.refresh);
+
       setMessage("Login successful!");
+      if (res.data.user.role === "admin") {
+        setTimeout(() => navigate("/admin/dashboard/home"), 1500);
+        return;
+      }
+      setTimeout(() => navigate("/user/dashboard/home"), 1500);
     } catch (err) {
-        console.error(err);
-      setMessage("Invalid credentials, please try again.");
+      console.error(err);
+      setError("Invalid credentials, please try again.");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 shadow-lg rounded-xl bg-white">
-      <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="auth-container">
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h2>Login</h2>
+        {error && <p className="error">{error}</p>}
+        {message && <p className="success">{message}</p>}
         <InputField
-          label="Username"
-          name="username"
-          value={formData.username}
+          label="Email"
+          name="email"
+          value={formData.email}
           onChange={handleChange}
         />
         <InputField
@@ -42,8 +60,13 @@ export default function Login() {
           onChange={handleChange}
         />
         <Button type="submit" label="Login" />
+        <AuthLinks
+          leftText="Forgot password?"
+          leftTo="/forgot-password"
+          rightText="Create an account"
+          rightTo="/signup/user"
+        />
       </form>
-      {message && <p className="text-center text-sm mt-3">{message}</p>}
     </div>
   );
 }
