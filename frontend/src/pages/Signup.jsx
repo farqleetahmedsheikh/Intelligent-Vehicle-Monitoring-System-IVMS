@@ -1,39 +1,48 @@
 /** @format */
 
 import { useState } from "react";
-import { registerUser } from "../api/authApi";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../../api/authApi";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
+import "../styles/Auth.css";
+import AuthLinks from "../components/AuthLinks";
 
 export default function Signup() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     cnic: "",
     phoneNumber: "",
     password: "",
+    role: "user",
   });
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setError("");
     try {
       await registerUser(formData);
-      setMessage("Account created successfully! Please login.");
+      setMessage("Account created successfully!");
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
-      setMessage(
-        "Error: " + (err.response?.data?.detail || "Unable to register.")
-      );
+      setError(err.response?.data?.error || "Something went wrong");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 shadow-lg rounded-xl bg-white">
-      <h2 className="text-2xl font-bold mb-4 text-center">Create Account</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="auth-container">
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h2>Create Account</h2>
+        {error && <p className="error">{error}</p>}
+        {message && <p className="success">{message}</p>}
         <InputField
           label="Full Name"
           name="fullName"
@@ -69,8 +78,13 @@ export default function Signup() {
           onChange={handleChange}
         />
         <Button type="submit" label="Sign Up" />
+        <AuthLinks
+          leftText="Already have an account?"
+          leftTo="/login"
+          rightText="Register as admin"
+          rightTo="/signup/admin"
+        />
       </form>
-      {message && <p className="text-center text-sm mt-3">{message}</p>}
     </div>
   );
 }
