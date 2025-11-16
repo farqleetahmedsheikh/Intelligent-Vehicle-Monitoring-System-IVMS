@@ -1,6 +1,5 @@
 /** @format */
 
-// src/components/AlertsDropdown.jsx
 import { useEffect, useState } from "react";
 import "./styles/AlertsDropdown.css";
 

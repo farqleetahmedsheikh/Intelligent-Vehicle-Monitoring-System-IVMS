@@ -1,7 +1,5 @@
 /** @format */
 
-// src/components/VehicleTable.jsx
-import React from "react";
 import "../styles/components.css";
 
 const VehicleTable = ({ vehicles }) => {

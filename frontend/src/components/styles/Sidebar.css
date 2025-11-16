@@ -3,6 +3,7 @@
     background-color: var(--primary-blue);
     color: var(--text-dark);
     height: calc(100vh - 52px);
+    overflow-y: auto;
     padding-top: 20px;
 }
 
@@ -22,4 +23,25 @@
 
 .sidebar li:hover {
     background-color: #1e293b;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-link.active {
+    background-color: var(--primary-color);
+    font-weight: 600;
+    color: white;
 }

@@ -19,7 +19,6 @@ const EditProfileModal = ({ user = {}, onClose, onSave }) => {
     setError("");
     try {
       // TODO: call API to update user profile (PATCH /users/<id>/)
-      // e.g. await axios.patch(`/api/users/${user.id}/`, form, { headers: {...} })
       onSave({ ...user, ...form });
     } catch (err) {
       setError("Failed to update profile");

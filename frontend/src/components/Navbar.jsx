@@ -1,13 +1,12 @@
 /** @format */
 
-// src/components/Navbar.jsx
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AlertsDropdown from "./AlertsDropdown";
 import ProfileDropdown from "./ProfileDropdown";
 import EditProfileModal from "./EditProfileModal";
 import "./styles/Navbar.css";
-import logoImage from "../assets/logo.png"; // replace with your logo path or import
+import logoImage from "../assets/logo.png";
 
 const Navbar = ({ user, onUpdateUser }) => {
   // user is object { id, fullName, email, avatarUrl?, role }
