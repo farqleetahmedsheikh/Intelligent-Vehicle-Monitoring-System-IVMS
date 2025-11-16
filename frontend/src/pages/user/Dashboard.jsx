@@ -1,11 +1,11 @@
 /** @format */
 
-import Navbar from "../components/Navbar";
+import Navbar from "../../components/Navbar";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
-import DashboardCard from "../components/DashboardCard";
-import "../styles/Dashboard.css";
-import { Car, FileText, Search, CheckCircle, User } from "lucide-react";
+import Sidebar from "../../components/Sidebar";
+import DashboardCard from "../../components/DashboardCard";
+import "../../styles/Dashboard.css";
+import { Car, FileText, Search, CheckCircle } from "lucide-react";
 import { useEffect } from "react";
 
 const Dashboard = () => {
@@ -39,10 +39,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="dashboard-container">
-      <Navbar user={user} />
-      <div className="dashboard-body">
-        <Sidebar />
+    <>
         <div className="dashboard-content">
           <h2>Dashboard Overview</h2>
 
@@ -101,8 +98,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </>
   );
 };
 

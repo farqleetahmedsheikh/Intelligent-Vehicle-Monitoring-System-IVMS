@@ -1,14 +1,16 @@
 /** @format */
 import "../styles/Auth.css";
-export default function InputField({ label, type, value, onChange, name }) {
+export default function InputField({ label, type, value, onChange, name, placeholder, style }) {
   return (
-    <div className="mb-4">
-      <label className="block text-sm font-semibold mb-1">{label}</label>
+    <div className="">
+      <label>{label}</label>
       <input
         type={type}
+        placeholder={placeholder}
         name={name}
         value={value}
         onChange={onChange}
+        style={style}
       />
     </div>
   );

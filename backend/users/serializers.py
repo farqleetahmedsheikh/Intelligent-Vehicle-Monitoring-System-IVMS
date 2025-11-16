@@ -9,15 +9,15 @@ User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    organization_name = serializers.CharField(write_only=True, required=False)
-    organization_code = serializers.CharField(write_only=True, required=False)
+    organizationName = serializers.CharField(write_only=True, required=False)
+    organizationCode = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
         fields = [
             'id', 'fullName', 'email', 'password',
             'cnic', 'phoneNumber', 'role',
-            'organization_name', 'organization_code'
+            'organizationName', 'organizationCode'
         ]
 
     def validate(self, attrs):
@@ -25,8 +25,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         # If registering as admin, verify organization name and code
         if role == 'admin':
-            org_name = attrs.get('organization_name')
-            org_code = attrs.get('organization_code')
+            org_name = attrs.get('organizationName')
+            org_code = attrs.get('organizationCode')
 
             allowed_orgs = getattr(settings, "ALLOWED_ORGANIZATIONS", {})
 

@@ -1,0 +1,143 @@
+/* Container for both pages */
+/* Container for main complaints page */
+.complaint-main-container {
+    background: var(--bg-light);
+    padding: 20px 30px;
+    border-radius: 12px;
+    margin: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.complaint-main-container p {
+    margin-bottom: 30px;
+    color: #555;
+}
+
+/* Cards for options */
+.complaint-options {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.complaint-card {
+    flex: 1 1 250px;
+    background: white;
+    padding: 30px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.complaint-card p {
+    color: #555;
+}
+
+.complaint-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+textarea {
+    font-size: large;
+    font-family: var(--font-main);
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.complaint-container {
+    background: var(--bg-light);
+    padding: 20px 30px;
+    border-radius: 12px;
+    margin: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Tabs (if you use tabs later) */
+.complaint-tabs {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.complaint-tabs button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #f0f0f0;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.complaint-tabs button.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Form Layout */
+.complaint-form .form-row {
+    display: flex;
+    gap: 20px;
+    margin-right: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.complaint-form .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.submit-btn {
+    padding: 12px 20px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+.submit-btn:hover {
+    background: darken(var(--primary-color), 10%);
+}
+
+/* Search Page */
+.search-bar {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Search Results */
+.search-results {
+    max-height: 500px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.search-result-item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+}
+
+.search-result-item p {
+    margin: 3px 0;
+}

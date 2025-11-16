@@ -19,16 +19,32 @@
     margin-bottom: 20px;
 }
 
-.auth-form input {
+select {
     width: 98%;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 12px;
+    border: 1px solid #d1d1d1;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: white;
+}
+
+select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+input {
+    font-size: large;
+    width: 100%;
+    padding: 10px;
     margin-bottom: 12px;
     border: 1px solid #ccc;
     border-radius: 5px;
 }
 
-.auth-form button {
+button {
     width: 100%;
     padding: 10px;
     background-color: var(--primary-blue);
@@ -38,7 +54,7 @@
     cursor: pointer;
 }
 
-.auth-form button:hover {
+button:hover {
     background-color: var(--primary-blue);
     transition: ease-in-out;
     scale: 1.02;

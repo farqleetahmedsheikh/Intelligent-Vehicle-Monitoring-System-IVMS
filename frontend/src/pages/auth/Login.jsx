@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../api/authApi";
-import InputField from "../components/InputField";
-import Button from "../components/Button";
-import "../styles/Auth.css";
-import AuthLinks from "../components/AuthLinks";
+import { loginUser } from "../../../api/authApi";
+import InputField from "../../components/InputField";
+import Button from "../../components/Button";
+import "../../styles/Auth.css";
+import AuthLinks from "../../components/AuthLinks";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -64,7 +64,7 @@ export default function Login() {
           leftText="Forgot password?"
           leftTo="/forgot-password"
           rightText="Create an account"
-          rightTo="/signup/user"
+          rightTo="/signup"
         />
       </form>
     </div>
