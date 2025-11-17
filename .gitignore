@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+
+# SQLite / DB files
+db.sqlite3
+*.sqlite3
+*.db
+# Virtual environment
+venv/
+.venv/

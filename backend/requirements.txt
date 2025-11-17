@@ -2,13 +2,13 @@
 # Core Frameworks
 # ----------------------------
 Django==5.0.4
-djangorestframework==3.15.1
-django-cors-headers==4.3.1
+djangorestframework==3.14.0
+django-cors-headers==3.13.0
 
 # ----------------------------
 # Database
 # ----------------------------
-sqlite3-binary==0.0.1  # SQLite for local dev (Python built-in, optional)
+#sqlite3-binary==0.0.1  # SQLite for local dev (Python built-in, optional)
 
 # ----------------------------
 # Image Processing & AI Modules
