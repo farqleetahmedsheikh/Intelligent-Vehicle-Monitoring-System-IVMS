@@ -2,7 +2,6 @@
     width: 220px;
     background-color: var(--primary-blue);
     color: var(--text-dark);
-    height: calc(100vh - 52px);
     overflow-y: auto;
     padding-top: 20px;
 }
