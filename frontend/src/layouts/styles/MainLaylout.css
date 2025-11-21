@@ -1,5 +1,19 @@
+.layout-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    flex-direction: row;
+}
+
 .dashboard-body {
     display: flex;
+}
+
+.sidebar{
+    width: 250px;
+    height: 100vh;
+    background-color: var(--bg-dark);
+    box-shadow: var(--box-shadow);
 }
 
 .layout-content {

@@ -11,13 +11,16 @@ export default function MainLayout() {
 
   return (
     <>
-      <Navbar user={user} />
+      <div className="layout-container">
+        <Navbar user={user} />
 
-      <div className="dashboard-body">
-        <Sidebar />
-
-        <div className="dashboard-content">
-          <Outlet />
+        <div className="dashboard-body">
+          <div className="sidebar">
+            <Sidebar />
+          </div>
+          <div className="dashboard-content">
+            <Outlet />
+          </div>
         </div>
       </div>
     </>

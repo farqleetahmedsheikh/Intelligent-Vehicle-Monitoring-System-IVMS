@@ -14,6 +14,7 @@ import SearchComplaintPage from "./pages/common/SearchComplain";
 import ComplaintMainPage from "./pages/common/MainComplaint";
 import CameraMainPage from "./pages/common/Camera";
 import ConfigureCamera from "./pages/admin/ConfigureCamera";
+import VehicleDetailsPage from "./pages/common/VehicleDetails";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="complain/search" element={<SearchComplaintPage />} />
           <Route path="complain/submit" element={<SubmitComplaintPage />} />
           <Route path="camera" element={<CameraMainPage />} />
+          <Route path="vehicle-details" element={<VehicleDetailsPage />} />
         </Route>
 
         {/* ADMIN Dashboard */}
@@ -45,6 +47,7 @@ function App() {
           <Route path="complain/submit" element={<SubmitComplaintPage />} />
           <Route path="camera" element={<CameraMainPage />} />
           <Route path="camera/configure" element={<ConfigureCamera />} />
+          <Route path="vehicle-details" element={<VehicleDetailsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
