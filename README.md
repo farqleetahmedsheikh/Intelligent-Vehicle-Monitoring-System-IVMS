@@ -41,7 +41,6 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py makemigrations
 python manage.py migrate
-python manage.py createsuperuser
 python manage.py runserver
 ```
 Access API at 👉 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
