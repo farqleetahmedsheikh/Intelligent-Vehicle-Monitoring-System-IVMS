@@ -19,15 +19,15 @@ This system includes:
 ivms_project/
 │
 ├── backend/              # Django backend (REST API)
-├── frontend_web/         # React Web Dashboard
-├── mobile_app/           # Flutter Mobile App
+├── frontend/         # React Web Dashboard
+├── track_vision/           # Flutter Mobile App
 ├── ai_module/            # YOLO + OCR scripts
 └── docs/                 # Documents and reports
 ```
 
 ---
 
-## ⚙️ Backend Setup (Django + SQLite)
+## ⚙️ Backend Setup (Django + My SQL)
 
 ### Requirements
 - Python 3.10+
@@ -35,9 +35,9 @@ ivms_project/
 
 ### Setup Steps
 ```bash
-cd backend
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
+cd backend
 pip install -r requirements.txt
 python manage.py makemigrations
 python manage.py migrate
@@ -74,14 +74,14 @@ This uses webcam input to detect number plates and extract text.
 
 ### Setup Steps
 ```bash
-cd frontend_web
+cd frontend
 npm install
 npm run dev
 ```
 Runs on 👉 [http://localhost:5173](http://localhost:5173)
 
 ### Environment Variables
-Create `.env` in `frontend_web/`
+Create `.env` in `frontend/`
 ```env
 VITE_API_URL=http://127.0.0.1:8000
 VITE_MAPS_API_KEY=your_google_maps_key
@@ -97,7 +97,7 @@ VITE_MAPS_API_KEY=your_google_maps_key
 
 ### Setup Steps
 ```bash
-cd mobile_app
+cd track_vision
 flutter pub get
 flutter run
 ```
