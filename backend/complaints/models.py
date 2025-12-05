@@ -10,7 +10,7 @@ class Complaint(models.Model):
     # Owner Info
     ownerName = models.CharField(max_length=100)
     ownerEmail = models.EmailField()
-    ownerPhone = models.CharField(max_length=20)
+    ownerPhone = models.CharField(max_length=20, null=True, blank=True)
     ownerCnic = models.CharField(max_length=15)
 
     # Vehicle Info

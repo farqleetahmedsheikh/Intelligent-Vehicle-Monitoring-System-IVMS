@@ -58,3 +58,9 @@
     text-align: center;
     color: #6b7280;
 }
+
+.mark-read {
+    width: fit-content;
+    cursor: pointer;
+    font-weight: 600;
+}

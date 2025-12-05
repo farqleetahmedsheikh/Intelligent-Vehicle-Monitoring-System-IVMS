@@ -1,5 +1,6 @@
 .sidebar {
     width: 220px;
+    height: 100vh;
     background-color: var(--primary-blue);
     color: var(--text-dark);
     overflow-y: auto;

@@ -3,23 +3,25 @@ import { useState } from "react";
 import "../../styles/Complain.css";
 import InputField from "../../components/InputField";
 import Button from "../../components/Button";
+import { registerComplaint } from "../../../api/complaintApi";
 
 export default function SubmitComplaintPage() {
-  const role = localStorage.getItem("user")
-    ? JSON.parse(localStorage.getItem("user"))?.role
+  const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
     : null;
-  console.log("User role from complain :", role);
+
   const [formData, setFormData] = useState({
     ownerEmail: "",
     ownerPhone: "",
     ownerCnic: "",
-    carMake: "",
-    carModel: "",
-    carVariant: "",
-    carColor: "",
-    carPlate: "",
-    carChasis: "",
-    carPicture: null,
+    vehicleMake: "",
+    vehicleModel: "",
+    vehicleVariant: "",
+    vehicleColor: "",
+    plateNumber: "",
+    chassisNumber: "",
+    complaintDescription: "",
+    vehiclePicture: null,
   });
 
   const handleChange = (e) => {
@@ -30,146 +32,155 @@ export default function SubmitComplaintPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Complaint Submitted:", formData);
-    alert("Complaint submitted successfully!");
-    // reset form
-    setFormData({
-      ownerEmail: "",
-      ownerPhone: "",
-      ownerCnic: "",
-      carMake: "",
-      carModel: "",
-      carVariant: "",
-      carColor: "",
-      carPlate: "",
-      carChasis: "",
-      carPicture: null,
-    });
+
+    // Auto fill user data if user is normal user
+    let finalData = { ...formData };
+    if (user && user.role === "user") {
+      finalData.ownerEmail = user.email;
+      finalData.ownerPhone = user.phoneNumber;
+      finalData.ownerCnic = user.cnic;
+    }
+
+    const form = new FormData();
+    for (let key in finalData) {
+      form.append(key, finalData[key]);
+    }
+
+    try {
+      console.log("Submitting complaint with data:", finalData);
+      await registerComplaint(finalData);
+
+      // Reset form
+      setFormData({
+        ownerEmail: "",
+        ownerPhone: "",
+        ownerCnic: "",
+        vehicleMake: "",
+        vehicleModel: "",
+        vehicleVariant: "",
+        vehicleColor: "",
+        plateNumber: "",
+        chassisNumber: "",
+        complaintDescription: "",
+        vehiclePicture: null,
+      });
+    } catch (error) {
+      console.error("Error submitting complaint:", error);
+    }
   };
 
   return (
     <div className="complaint-container">
       <h2>Submit a Complaint</h2>
+
       <form className="complaint-form" onSubmit={handleSubmit}>
-        {role === "admin" && (
+        {user?.role === "admin" && (
           <>
             <h3>Owner Details</h3>
             <div className="form-row">
-              <div className="form-group">
-                <InputField
-                style={{width: "90%"}}
-                  label="Owner Email"
-                  type="email"
-                  name="ownerEmail"
-                  value={formData.ownerEmail}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="form-group">
-                <InputField
-                style={{width: "90%"}}
-                  label="Owner Phone"
-                  type="text"
-                  name="ownerPhone"
-                  value={formData.ownerPhone}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-            <div className="form-group">
               <InputField
-              style={{width: "90%"}}
-                label="Owner CNIC"
-                type="text"
-                name="ownerCnic"
-                value={formData.ownerCnic}
+                label="Owner Email"
+                name="ownerEmail"
+                type="email"
+                value={formData.ownerEmail}
                 onChange={handleChange}
+                style={{ width: "90%" }}
+              />
+
+              <InputField
+                label="Owner Phone"
+                name="ownerPhone"
+                type="text"
+                value={formData.ownerPhone}
+                onChange={handleChange}
+                style={{ width: "90%" }}
               />
             </div>
+
+            <InputField
+              label="Owner CNIC"
+              name="ownerCnic"
+              type="text"
+              value={formData.ownerCnic}
+              onChange={handleChange}
+              style={{ width: "90%" }}
+            />
           </>
         )}
+
         <h3>Vehicle Details</h3>
+
         <div className="form-row">
-          <div className="form-group">
-            <InputField
-            style={{width: "90%"}}
-              label="Car Make"
-              type="text"
-              name="carMake"
-              value={formData.carMake}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="form-group">
-            <InputField
-            style={{width: "90%"}}
-              label="Car Model"
-              type="text"
-              name="carModel"
-              value={formData.carModel}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <InputField
-            style={{width: "90%"}}
-              label="Car Variant"
-              type="text"
-              name="carVariant"
-              value={formData.carVariant}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="form-group">
-            <InputField
-            style={{width: "90%"}}
-              label="Car Color"
-              type="text"
-              name="carColor"
-              value={formData.carColor}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <InputField
-            style={{width: "90%"}}
-              label="Car Plate Number"
-              type="text"
-              name="carPlate"
-              value={formData.carPlate}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="form-group">
-            <InputField
-            style={{width: "90%"}}
-              label="Chassis Number"
-              type="text"
-              name="carChasis"
-              value={formData.carChasis}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        <div className="form-group">
-          <label> Complaint Description</label>
-          <textarea cols="30" rows="10"></textarea>
-        </div>
-        <div className="form-group">
           <InputField
-          style={{width: "90%"}}
-            label="Upload Vehicle Image"
-            type="file"
-            name="carPicture"
+            label="Make"
+            name="vehicleMake"
+            value={formData.vehicleMake}
             onChange={handleChange}
+            style={{ width: "90%" }}
+          />
+
+          <InputField
+            label="Model"
+            name="vehicleModel"
+            value={formData.vehicleModel}
+            onChange={handleChange}
+            style={{ width: "90%" }}
           />
         </div>
+
+        <div className="form-row">
+          <InputField
+            label="Variant"
+            name="vehicleVariant"
+            value={formData.vehicleVariant}
+            onChange={handleChange}
+            style={{ width: "90%" }}
+          />
+
+          <InputField
+            label="Color"
+            name="vehicleColor"
+            value={formData.vehicleColor}
+            onChange={handleChange}
+            style={{ width: "90%" }}
+          />
+        </div>
+
+        <div className="form-row">
+          <InputField
+            label="Plate Number"
+            name="plateNumber"
+            value={formData.plateNumber}
+            onChange={handleChange}
+            style={{ width: "90%" }}
+          />
+
+          <InputField
+            label="Chassis Number"
+            name="chassisNumber"
+            value={formData.chassisNumber}
+            onChange={handleChange}
+            style={{ width: "90%" }}
+          />
+        </div>
+
+        <label>Complaint Description</label>
+        <textarea
+          name="complaintDescription"
+          rows="4"
+          value={formData.complaintDescription}
+          onChange={handleChange}
+        />
+
+        <InputField
+          label="Upload Vehicle Image"
+          type="file"
+          name="vehiclePicture"
+          onChange={handleChange}
+          style={{ width: "90%" }}
+        />
 
         <Button label="Submit Complaint" type="submit" />
       </form>
