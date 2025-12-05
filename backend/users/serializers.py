@@ -9,8 +9,8 @@ User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    organizationName = serializers.CharField(write_only=True, required=False)
-    organizationCode = serializers.CharField(write_only=True, required=False)
+    organizationName = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
+    organizationCode = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = User
@@ -36,8 +36,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop("organization_name", None)
-        validated_data.pop("organization_code", None)
+        validated_data.pop("organizationName", None)
+        validated_data.pop("organizationCode", None)
         user = User.objects.create_user(
             fullName=validated_data.get('fullName', ''),
             email=validated_data.get('email', ''),

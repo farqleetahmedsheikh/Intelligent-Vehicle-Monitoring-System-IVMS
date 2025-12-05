@@ -3,17 +3,21 @@ import { useState } from "react";
 import "../../styles/SearchComplaint.css";
 import InputField from "../../components/InputField";
 import Button from "../../components/Button";
-import { searchComplaint } from "../../../api/complaintApi";
+import { searchComplaintForAdmin } from "../../../api/complaintApi";
+import { Link } from "react-router-dom";
 
 export default function SearchComplaintPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const role = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).role
+    : null;
 
   const handleSearch = async () => {
+    console.log("Searching for:", searchQuery, "With role:", role);
     if (!searchQuery.trim()) {
       setError("Please enter Plate Number, CNIC or Chassis Number.");
       return;
@@ -24,11 +28,12 @@ export default function SearchComplaintPage() {
     setSuccessMessage("");
 
     try {
-      const res = await searchComplaint(searchQuery);
+      const res = await searchComplaintForAdmin(searchQuery, role);
+      console.log("Search response:", res);
 
-      if (Array.isArray(res.data) && res.data.length > 0) {
-        setResults(res.data);
-        setSuccessMessage(`Found ${res.data.length} result(s).`);
+      if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+        setResults(res.data.data);
+        setSuccessMessage(`Found ${res.data.data.length} result(s).`);
       } else {
         setResults([]);
         setError("No matching vehicle found.");
@@ -92,13 +97,16 @@ export default function SearchComplaintPage() {
                     item.status === "investigating"
                       ? "status investigating"
                       : item.status === "resolved"
-                      ? "status resolved"
-                      : "status closed"
+                        ? "status resolved"
+                        : "status closed"
                   }
                 >
                   {item.status.toUpperCase()}
                 </span>
               </p>
+              <Link to={`/${role}/dashboard/vehicle-details/${item.id}`}>
+                View More
+              </Link>
             </div>
           ))
         )}

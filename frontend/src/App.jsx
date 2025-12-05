@@ -1,5 +1,5 @@
 /** @format */
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import DashboardLayout from "./layouts/MainLayout";
 import Signup from "./pages/auth/Signup";
@@ -21,6 +21,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Redirect / to /login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
         {/* Authentication */}
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
@@ -36,7 +38,7 @@ function App() {
           <Route path="complain/search" element={<SearchComplaintPage />} />
           <Route path="complain/submit" element={<SubmitComplaintPage />} />
           <Route path="camera" element={<CameraMainPage />} />
-          <Route path="vehicle-details" element={<VehicleDetailsPage />} />
+          <Route path="vehicle-details/:id" element={<VehicleDetailsPage />} />
           <Route path="alert-details" element={<AlertDetailsPage />} />
         </Route>
 
@@ -45,11 +47,11 @@ function App() {
           <Route index element={<AdminDashboard />} /> {/* /admin/dashboard */}
           <Route path="home" element={<AdminDashboard />} />
           <Route path="complain" element={<ComplaintMainPage />} />
-          <Route path="complain/search" element={<SubmitComplaintPage />} />
+          <Route path="complain/search" element={<SearchComplaintPage />} />
           <Route path="complain/submit" element={<SubmitComplaintPage />} />
           <Route path="camera" element={<CameraMainPage />} />
           <Route path="camera/configure" element={<ConfigureCamera />} />
-          <Route path="vehicle-details" element={<VehicleDetailsPage />} />
+          <Route path="vehicle-details/:id" element={<VehicleDetailsPage />} />
           <Route path="alert-details" element={<AlertDetailsPage />} />
         </Route>
       </Routes>

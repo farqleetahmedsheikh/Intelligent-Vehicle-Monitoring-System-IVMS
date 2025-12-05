@@ -52,3 +52,15 @@
 .search-result-item:hover {
     background: #f0f0f0;
 }
+
+.view-more-link {
+    text-decoration: none;
+    color: var(--primary-blue);
+    border-radius: 8px;
+    transition: all 0.15s, color 0.15s, transform 0.08s;
+}
+
+.view-more-link:hover {
+    text-decoration: underline;
+    transition: all 0.15s, color 0.15s, transform 0.08s;
+}

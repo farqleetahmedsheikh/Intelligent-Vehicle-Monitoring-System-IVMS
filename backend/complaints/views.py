@@ -1,14 +1,15 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import Complaint
 from .serializers import ComplaintSerializer
 
-
 @api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
 def register_complaint(request):
     serializer = ComplaintSerializer(data=request.data)
 
@@ -16,13 +17,13 @@ def register_complaint(request):
         complaint = serializer.save()
 
         # Render email
-        html_content = render_to_string("emails/complaint_registered.html", {
+        html_content = render_to_string("email/complaint_registered.html", {
             "ownerName": complaint.ownerName,
             "complaintId": complaint.id,
             "plateNumber": complaint.plateNumber,
             "vehicleModel": complaint.vehicleModel,
             "vehicleColor": complaint.vehicleColor,
-            "year": 2025,
+            "variant": complaint.vehicleVariant,
         })
 
         email = EmailMultiAlternatives(
@@ -43,44 +44,65 @@ def register_complaint(request):
 
 @api_view(['GET'])
 def search_complaint(request):
-    query = request.query_params.get('q')
-
+    query = request.query_params.get('q', '').strip()
+    role = request.query_params.get('role')
+    if(role == "user"):
+        email = request.query_params.get('email')
     if not query:
         return Response({"error": "Search query 'q' is required"}, status=400)
 
+    complaints = Complaint.objects.none()
+    
     # Detect what user entered
     is_cnic = query.replace('-', '').isdigit() and len(query.replace('-', '')) in [13, 14]
-    is_plate = any(char.isalpha() for char in query) and any(char.isdigit() for char in query)
+    is_plate = any(c.isalpha() for c in query) and any(c.isdigit() for c in query)
     is_chassis = len(query) > 10 and query.isalnum()
-
-    # Apply filters
-    complaints = Complaint.objects.none()
-
+    print("Search query:", query, "is_cnic:", is_cnic, "is_plate:", is_plate, "is_chassis:", is_chassis)
     if is_cnic:
         complaints = Complaint.objects.filter(ownerCnic=query)
-
     elif is_plate:
+        print("Searching complaints by plate number:", query)
         complaints = Complaint.objects.filter(plateNumber__iexact=query)
-
+        print("Complaints found for plate number", query, ":", complaints)
     elif is_chassis:
         complaints = Complaint.objects.filter(chassisNumber__iexact=query)
-
     else:
-        # fallback: try name, email, phone, make, model
         complaints = Complaint.objects.filter(
-            ownerName__icontains=query
-        ) | Complaint.objects.filter(
-            ownerEmail__icontains=query
-        ) | Complaint.objects.filter(
-            ownerPhone__icontains=query
-        ) | Complaint.objects.filter(
-            vehicleMake__icontains=query
-        ) | Complaint.objects.filter(
-            vehicleModel__icontains=query
+            Q(ownerName__icontains=query) |
+            Q(ownerEmail__icontains=query) |
+            Q(ownerPhone__icontains=query) |
+            Q(vehicleMake__icontains=query) |
+            Q(vehicleModel__icontains=query)
         )
 
-    if not complaints.exists():
-        return Response({"message": "No records found"}, status=404)
+    # Restrict normal users
+    
+    if role != 'admin':
+        print("Searching complaints for user:", "with query:", query)
+        complaints = complaints.filter(ownerEmail=email)
 
     serializer = ComplaintSerializer(complaints, many=True)
-    return Response(serializer.data, status=200)
+    return Response({"data": serializer.data, "status": 200})
+
+@api_view(['GET'])
+def complaint_list(request):
+    userEmail = request.GET.get('email')
+
+    if userEmail:
+        complaints = Complaint.objects.filter(ownerEmail=userEmail).order_by('-createdAt')
+    else:
+        complaints = Complaint.objects.all().order_by('-createdAt')
+
+    serializer = ComplaintSerializer(complaints, many=True)
+    print("Complaints fetched for", userEmail, ":", serializer.data)
+    return Response({"complaints": serializer.data})
+
+@api_view(['GET'])
+def get_complaint(request, complaint_id):
+    try:
+        complaint = Complaint.objects.get(id=complaint_id)
+    except Complaint.DoesNotExist:
+        return Response({"error": "Complaint not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = ComplaintSerializer(complaint)
+    return Response(serializer.data, status=status.HTTP_200_OK)

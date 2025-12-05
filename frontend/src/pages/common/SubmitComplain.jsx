@@ -4,13 +4,17 @@ import "../../styles/Complain.css";
 import InputField from "../../components/InputField";
 import Button from "../../components/Button";
 import { registerComplaint } from "../../../api/complaintApi";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function SubmitComplaintPage() {
+  const navigate = useNavigate();
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
 
   const [formData, setFormData] = useState({
+    ownerName: "",
     ownerEmail: "",
     ownerPhone: "",
     ownerCnic: "",
@@ -32,12 +36,21 @@ export default function SubmitComplaintPage() {
     });
   };
 
+  const goBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/"); // fallback route if no history
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Auto fill user data if user is normal user
     let finalData = { ...formData };
     if (user && user.role === "user") {
+      finalData.ownerName = user.fullName;
       finalData.ownerEmail = user.email;
       finalData.ownerPhone = user.phoneNumber;
       finalData.ownerCnic = user.cnic;
@@ -73,6 +86,9 @@ export default function SubmitComplaintPage() {
 
   return (
     <div className="complaint-container">
+      <button className="back-button" onClick={goBack}>
+        <ArrowLeft size={18} /> Back
+      </button>
       <h2>Submit a Complaint</h2>
 
       <form className="complaint-form" onSubmit={handleSubmit}>

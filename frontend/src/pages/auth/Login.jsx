@@ -1,6 +1,6 @@
 /** @format */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../../api/authApi";
 import InputField from "../../components/InputField";
@@ -13,6 +13,20 @@ export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : null;
+  const accessToken = localStorage.getItem("access") || null;
+  useEffect(() => {
+    if (accessToken && user && user.role) {
+      if (user.role === "admin") {
+        navigate("/admin/dashboard/home");
+        return;
+      }
+      navigate("/user/dashboard/home");
+    }
+  }, [navigate, accessToken, user]);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -4,7 +4,9 @@ import "../../styles/Complain.css";
 
 export default function ComplaintMainPage() {
   const navigate = useNavigate();
-
+  const role = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).role
+    : null;
   return (
     <div className="complaint-main-container">
       <h2>Vehicle Complaints</h2>
@@ -13,7 +15,7 @@ export default function ComplaintMainPage() {
       <div className="complaint-options">
         <div
           className="complaint-card"
-          onClick={() => navigate("/user/dashboard/complain/submit")}
+          onClick={() => navigate(`/${role}/dashboard/complain/submit`)}
         >
           <h3>Submit Complaint</h3>
           <p>Report a new stolen or lost vehicle.</p>
@@ -21,7 +23,7 @@ export default function ComplaintMainPage() {
 
         <div
           className="complaint-card"
-          onClick={() => navigate("/user/dashboard/complain/search")}
+          onClick={() => navigate(`/${role}/dashboard/complain/search`)}
         >
           <h3>Search Complaint</h3>
           <p>Check status or details of existing complaints.</p>

@@ -27,11 +27,7 @@ ivms_project/
 
 ---
 
-<<<<<<< HEAD
-## ⚙️ Backend Setup (Django + My SQL)
-=======
 ## ⚙️ Backend Setup (Django + MySQL)
->>>>>>> 88aeb70 (Update setup instructions and resolve merge artifacts)
 
 ### Requirements
 - Python 3.10+

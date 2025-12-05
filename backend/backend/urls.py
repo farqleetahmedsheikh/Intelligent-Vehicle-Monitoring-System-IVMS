@@ -1,9 +1,15 @@
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path
 from users.views import RegisterView, LoginView, ForgotPasswordView, VerifyOTPView, ResetPasswordView
+from django.conf.urls.static import static
+from pathlib import Path
+
+VEHICLE_PICTURES_ROOT = Path(__file__).resolve().parent.parent / "vehicle_pictures"
 
 # Import complaint views
-from complaints.views import register_complaint, search_complaint
+from complaints.views import register_complaint, search_complaint, complaint_list, get_complaint
 from alerts.views import get_user_alerts, get_alert_details, mark_alert_read
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -16,11 +22,17 @@ urlpatterns = [
     path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
 
     # Complaint APIs
+    path('complaints/', complaint_list, name="complaint-list"),
     path('complaints/register/', register_complaint, name="register-complaint"),
     path('complaints/search/', search_complaint, name="search-complaint"),
+    path('complaints/<int:complaint_id>/', get_complaint, name='get-complaint'),
 
     # Alert APIs
     path("alerts/user/", get_user_alerts, name="get-user-alerts"),
     path("alerts/<int:alert_id>/mark-read/", mark_alert_read, name="mark-alert-read"),
     path("alerts/<int:alert_id>/", get_alert_details, name="get_alert_details"),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static('/vehicle_pictures/', document_root=VEHICLE_PICTURES_ROOT)
+    
