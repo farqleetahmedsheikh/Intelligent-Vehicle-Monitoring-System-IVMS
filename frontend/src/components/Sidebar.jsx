@@ -1,23 +1,18 @@
 /** @format */
 import "./styles/Sidebar.css";
 import { NavLink } from "react-router-dom";
-import { Home, Car, Camera, MessageSquareWarning } from "lucide-react";
+import { Home, Camera, MessageSquareWarning } from "lucide-react";
 
 const Sidebar = () => {
   const role = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))?.role
     : null;
-  console.log("User role from Sidebar :", role);
-  let baseUrl = "/user/dashboard";
-  if (role === "admin") {
-    baseUrl = "/admin/dashboard";
-  }
   return (
     <aside className="sidebar">
       <ul>
         <li>
           <NavLink
-            to={`${baseUrl}/home`}
+            to={`/${role}/dashboard/home`}
             className={({ isActive }) =>
               isActive ? "sidebar-link active" : "sidebar-link"
             }
@@ -28,7 +23,7 @@ const Sidebar = () => {
 
         <li>
           <NavLink
-            to={`${baseUrl}/complain`}
+            to={`/${role}/dashboard/complain`}
             className={({ isActive }) =>
               isActive ? "sidebar-link active" : "sidebar-link"
             }
@@ -50,7 +45,7 @@ const Sidebar = () => {
 
         <li>
           <NavLink
-            to={`${baseUrl}/camera`}
+            to={`/${role}/dashboard/camera`}
             className={({ isActive }) =>
               isActive ? "sidebar-link active" : "sidebar-link"
             }

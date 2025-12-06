@@ -27,7 +27,7 @@ ivms_project/
 
 ---
 
-## ⚙️ Backend Setup (Django + My SQL)
+## ⚙️ Backend Setup (Django + MySQL)
 
 ### Requirements
 - Python 3.10+
@@ -146,9 +146,3 @@ const String BASE_URL = "http://127.0.0.1:8000";
 - Real-time route heatmaps
 - Push notifications
 - Cloud deployment (AWS / Railway / Vercel)
-
----
-<<<<<<< HEAD
-=======
-
->>>>>>> afabaa61d9b7fd4e2410b523be95091ab2994df2

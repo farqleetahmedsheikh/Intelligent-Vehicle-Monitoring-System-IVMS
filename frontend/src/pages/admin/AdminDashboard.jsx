@@ -1,24 +1,48 @@
 /** @format */
 
-import Navbar from "../../components/Navbar";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../../components/Sidebar";
 import DashboardCard from "../../components/DashboardCard";
 import "../../styles/Dashboard.css";
-import { Car, FileText, Search, CheckCircle, User } from "lucide-react";
-import { useEffect } from "react";
+import { FileText, Search, CheckCircle, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import Loader from "../../components/Loader";
+import { fetchAllComplaints } from "../../../api/complaintApi";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
   const accessToken = localStorage.getItem("access") || null;
+
   useEffect(() => {
     if (!accessToken || !user || user.role !== "admin") {
       navigate("/login");
+      return;
     }
-  }, [navigate, accessToken, user]);
+
+    const fetchComplaints = async () => {
+      console.log("Fetching complaints for user:", user.email);
+      try {
+        setLoading(true);
+        const response = await fetchAllComplaints();
+
+        if (response.status !== 200) throw new Error("Failed to fetch complaints");
+
+        setComplaints(response.data.complaints);
+      } catch (error) {
+        console.error("Error Console", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchComplaints();
+
+    // Only run when user.email changes (instead of full user object)
+  }, [navigate, accessToken, user?.email]);
 
   const detections = [
     {
@@ -34,7 +58,11 @@ const AdminDashboard = () => {
       image: "",
     },
   ];
-
+  const totalReports = complaints.length;
+  const pendingInvestigations = complaints.filter(c => c.status === "investigating").length;
+  const resolvedCases = complaints.filter(c => c.status === "resolved").length;
+  const closedCases = complaints.filter((c) => c.status === "closed").length;
+  if (loading) return <Loader />;
   return (
     <div className="dashboard-container">
       <div className="dashboard-body">
@@ -43,25 +71,25 @@ const AdminDashboard = () => {
 
           <div className="overview-cards">
             <DashboardCard
-              title="My Registered Vehicles"
-              value="3"
-              icon={<Car />}
-            />
-            <DashboardCard
               title="Reports Submitted"
-              value="5"
+              value={totalReports}
               icon={<FileText />}
             />
             <DashboardCard
               title="Pending Investigations"
-              value="2"
+              value={pendingInvestigations}
               icon={<Search />}
             />
             <DashboardCard
               title="Resolved Cases"
-              value="1"
+              value={resolvedCases}
               icon={<CheckCircle />}
             />
+             <DashboardCard
+            title="Closed Cases"
+            value={closedCases}
+            icon={<FileCheck />}
+          />
           </div>
 
           <div className="feed-map">

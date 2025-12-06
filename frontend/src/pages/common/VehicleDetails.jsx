@@ -1,10 +1,51 @@
-/** @format */
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/VehicleDetails.css";
+import { fetchComplaintById } from "../../../api/complaintApi";
+import Loader from "../../components/Loader";
+import { ArrowLeft } from "lucide-react";
 
 export default function VehicleDetailsPage() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [complaint, setComplaint] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+    const goBack = () => {
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate("/"); // fallback route if no history
+      }
+    };
+  useEffect(() => {
+    const getComplaint = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchComplaintById(id); // axios call
+        setComplaint(response.data);
+      } catch (err) {
+        setError("Failed to fetch vehicle details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getComplaint();
+  }, [id]);
+
+  if (loading) return <Loader />;
+  if (error) return <p>{error}</p>;
+  if (!complaint) return <p>No vehicle found.</p>;
+  console.log("Vehicle Complaint", complaint);
+
   return (
     <div className="vehicle-details-container">
-      <h2 className="page-title">Vehicle Details</h2>
+      <button className="back-button" onClick={goBack}>
+        <ArrowLeft size={18} /> Back
+      </button>
+      {/* <h2 className="page-title">Vehicle Details</h2> */}
 
       {/* Vehicle Information */}
       <div className="details-card">
@@ -12,37 +53,38 @@ export default function VehicleDetailsPage() {
         <div className="details-grid">
           <div className="detail-item">
             <label>Make:</label>
-            <p>Toyota</p>
+            <p>{complaint.vehicleMake}</p>
           </div>
           <div className="detail-item">
             <label>Model:</label>
-            <p>Corolla</p>
+            <p>{complaint.vehicleModel}</p>
           </div>
           <div className="detail-item">
             <label>Variant:</label>
-            <p>GLi</p>
+            <p>{complaint.vehicleVariant}</p>
           </div>
           <div className="detail-item">
             <label>Color:</label>
-            <p>White</p>
+            <p>{complaint.vehicleColor}</p>
           </div>
-
           <div className="detail-item">
             <label>Plate No:</label>
-            <p>ABC-123</p>
+            <p>{complaint.plateNumber}</p>
           </div>
           <div className="detail-item">
             <label>Chassis No:</label>
-            <p>YZT09876</p>
+            <p>{complaint.chassisNumber}</p>
           </div>
 
-          <div className="vehicle-image-box">
-            <img
-              src="https://via.placeholder.com/300x170"
-              alt="Vehicle"
-              className="vehicle-image"
-            />
-          </div>
+          {complaint.vehiclePicture && (
+            <div className="vehicle-image-box">
+              <img
+                src={`http://localhost:8000/${complaint.vehiclePicture}`}
+                alt="Vehicle"
+                className="vehicle-image"
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -52,57 +94,24 @@ export default function VehicleDetailsPage() {
         <div className="details-grid">
           <div className="detail-item">
             <label>Name:</label>
-            <p>Ahmad Ali</p>
+            <p>{complaint.ownerName}</p>
           </div>
           <div className="detail-item">
             <label>Email:</label>
-            <p>ahmad@example.com</p>
+            <p>{complaint.ownerEmail}</p>
           </div>
           <div className="detail-item">
             <label>Phone:</label>
-            <p>0321-1234567</p>
+            <p>{complaint.ownerPhone}</p>
           </div>
           <div className="detail-item">
             <label>CNIC:</label>
-            <p>35202-1234567-8</p>
+            <p>{complaint.ownerCnic}</p>
           </div>
         </div>
       </div>
 
-      {/* Last Detection */}
-      <div className="details-card">
-        <h3>Last Detection</h3>
-        <div className="detection-row">
-          <p>
-            <strong>Location:</strong> Kashmir Highway, Islamabad
-          </p>
-          <p>
-            <strong>Date:</strong> 22 Jan 2025
-          </p>
-          <p>
-            <strong>Time:</strong> 10:42 AM
-          </p>
-        </div>
-
-        <div className="vehicle-image-box">
-          <img
-            src="https://via.placeholder.com/400x220"
-            className="vehicle-image"
-            alt="Last detection snapshot"
-          />
-        </div>
-      </div>
-
-      {/* Predicted Routes */}
-      <div className="details-card">
-        <h3>Possible Predicted Routes</h3>
-
-        <ul className="routes-list">
-          <li>Route 1 → IJP Road → Faizabad → Murree Road</li>
-          <li>Route 2 → Kashmir Highway → G-9 → G-10</li>
-          <li>Route 3 → GT Road → Rawat → Lahore direction</li>
-        </ul>
-      </div>
+      {/* You can add Last Detection and Predicted Routes dynamically if available */}
     </div>
   );
 }

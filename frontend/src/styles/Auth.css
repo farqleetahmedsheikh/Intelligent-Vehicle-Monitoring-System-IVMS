@@ -20,13 +20,12 @@
 }
 
 select {
-    width: 98%;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    width: 100%;
+    padding: 10px;
     margin-bottom: 12px;
     border: 1px solid #d1d1d1;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: large;
     background-color: white;
 }
 
@@ -37,7 +36,7 @@ select:focus {
 
 input {
     font-size: large;
-    width: 100%;
+    width: 93%;
     padding: 10px;
     margin-bottom: 12px;
     border: 1px solid #ccc;
@@ -75,13 +74,19 @@ button:hover {
 }
 
 .error {
-    color: red;
-    text-align: center;
-    margin-bottom: 10px;
+    background: #ffdddd;
+    padding: 10px;
+    border-left: 4px solid #ff4d4d;
+    color: #a60000;
+    margin-bottom: 12px;
+    border-radius: 4px;
 }
 
 .success {
-    color: green;
-    text-align: center;
-    margin-bottom: 10px;
+    background: #ddffdd;
+    padding: 10px;
+    border-left: 4px solid #4dff4d;
+    color: #006600;
+    margin-bottom: 12px;
+    border-radius: 4px;
 }

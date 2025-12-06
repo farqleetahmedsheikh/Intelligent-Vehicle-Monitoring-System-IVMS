@@ -33,6 +33,8 @@ ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
+    'users',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,7 +47,10 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # Local apps
-    'users',
+    'complaints',
+    'routes',
+    'detection',
+    "alerts",
 ]
 
 
@@ -66,7 +71,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR.parent / "backend" / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -89,9 +94,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'visiontrack_db',
         'USER': 'root',
-        'PASSWORD': 'root',  # leave empty if no password
+        'PASSWORD': '',  # leave empty if no password
         'HOST': '127.0.0.1',
         'PORT': '3306',
+         'OPTIONS': {
+            'unix_socket': '/opt/local/var/run/mariadb-10.11/mysqld.sock',
+        },
     }
 }
 
@@ -170,3 +178,8 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'Trackvision240@gmail.com'
 EMAIL_HOST_PASSWORD = 'effl pesz xmht dzrk'
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR.parent / 'backend/vehicle_pictures',  # <-- your images folder
+]
