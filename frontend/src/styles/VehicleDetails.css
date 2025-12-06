@@ -6,7 +6,7 @@
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 25px;
-    color: var(--primary-blue);
+    color: var(--primary-text);
 }
 
 .details-card {
@@ -44,7 +44,6 @@
 .vehicle-image-box {
     grid-column: span 2;
     margin-top: 10px;
-    text-align: center;
 }
 
 .vehicle-image {

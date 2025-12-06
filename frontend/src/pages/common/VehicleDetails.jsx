@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/VehicleDetails.css";
 import { fetchComplaintById } from "../../../api/complaintApi";
 import Loader from "../../components/Loader";
+import { ArrowLeft } from "lucide-react";
 
 export default function VehicleDetailsPage() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+    const goBack = () => {
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate("/"); // fallback route if no history
+      }
+    };
   useEffect(() => {
     const getComplaint = async () => {
       try {
@@ -33,7 +42,10 @@ export default function VehicleDetailsPage() {
 
   return (
     <div className="vehicle-details-container">
-      <h2 className="page-title">Vehicle Details</h2>
+      <button className="back-button" onClick={goBack}>
+        <ArrowLeft size={18} /> Back
+      </button>
+      {/* <h2 className="page-title">Vehicle Details</h2> */}
 
       {/* Vehicle Information */}
       <div className="details-card">

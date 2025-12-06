@@ -3,7 +3,7 @@
 import { useNavigate } from "react-router-dom";
 import DashboardCard from "../../components/DashboardCard";
 import "../../styles/Dashboard.css";
-import {FileText, Search, CheckCircle } from "lucide-react";
+import {FileText, Search, CheckCircle, FileCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fetchUserComplaints } from "../../../api/complaintApi";
 import Loader from "../../components/Loader";
@@ -64,6 +64,7 @@ const Dashboard = () => {
   const totalReports = complaints.length;
   const pendingInvestigations = complaints.filter(c => c.status === "investigating").length;
   const resolvedCases = complaints.filter(c => c.status === "resolved").length;
+  const closedCases = complaints.filter(c => c.status === "closed").length;
 
   if (loading) return <Loader />;
 
@@ -87,6 +88,11 @@ const Dashboard = () => {
             title="Resolved Cases"
             value={resolvedCases}
             icon={<CheckCircle />}
+          />
+          <DashboardCard
+            title="Closed Cases"
+            value={closedCases}
+            icon={<FileCheck />}
           />
         </div>
 

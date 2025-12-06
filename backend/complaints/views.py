@@ -7,6 +7,9 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import Complaint
 from .serializers import ComplaintSerializer
+import logging
+
+logger = logging.getLogger(__name__)
 
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
@@ -16,27 +19,37 @@ def register_complaint(request):
     if serializer.is_valid():
         complaint = serializer.save()
 
-        # Render email
-        html_content = render_to_string("email/complaint_registered.html", {
-            "ownerName": complaint.ownerName,
-            "complaintId": complaint.id,
-            "plateNumber": complaint.plateNumber,
-            "vehicleModel": complaint.vehicleModel,
-            "vehicleColor": complaint.vehicleColor,
-            "variant": complaint.vehicleVariant,
-        })
+        try:
+            html_content = render_to_string("email/complaint_registered.html", {
+                "ownerName": complaint.ownerName,
+                "complaintId": complaint.id,
+                "plateNumber": complaint.plateNumber,
+                "vehicleModel": complaint.vehicleModel,
+                "vehicleColor": complaint.vehicleColor,
+                "variant": complaint.vehicleVariant,
+            })
 
-        email = EmailMultiAlternatives(
-            subject="Your Vehicle Theft Complaint is Registered",
-            body="",
-            from_email="Trackvision240@gmail.com",
-            to=[complaint.ownerEmail],
-        )
-        email.attach_alternative(html_content, "text/html")
-        email.send()
+            email = EmailMultiAlternatives(
+                subject="Your Vehicle Theft Complaint is Registered",
+                body="",
+                from_email="Trackvision240@gmail.com",
+                to=[complaint.ownerEmail],
+            )
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+
+            email_status = "Email sent successfully"
+
+        except Exception as e:
+            logger.error(f"Failed to send complaint email: {e}")
+            email_status = "Failed to send email notification"
 
         return Response(
-            {"message": "Complaint registered successfully", "data": serializer.data},
+            {
+                "message": "Complaint registered successfully",
+                "email_status": email_status,
+                "data": serializer.data
+            },
             status=status.HTTP_201_CREATED
         )
 

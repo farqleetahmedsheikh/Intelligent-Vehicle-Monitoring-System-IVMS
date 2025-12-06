@@ -12,7 +12,8 @@ export default function SubmitComplaintPage() {
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
-
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     ownerName: "",
     ownerEmail: "",
@@ -63,8 +64,14 @@ export default function SubmitComplaintPage() {
 
     try {
       console.log("Submitting complaint with data:", finalData);
-      await registerComplaint(finalData);
-
+      const response = await registerComplaint(finalData);
+      if (response.data.email_status.includes("Failed")) {
+        setMessage(
+          "Complaint registered successfully, but email could not be sent."
+        );
+      } else {
+        setMessage("Complaint registered successfully and email sent!");
+      }
       // Reset form
       setFormData({
         ownerEmail: "",
@@ -80,6 +87,7 @@ export default function SubmitComplaintPage() {
         vehiclePicture: null,
       });
     } catch (error) {
+      setError("Something went wrong! Try again");
       console.error("Error submitting complaint:", error);
     }
   };
@@ -90,7 +98,8 @@ export default function SubmitComplaintPage() {
         <ArrowLeft size={18} /> Back
       </button>
       <h2>Submit a Complaint</h2>
-
+      {error && <p className="error">{error}</p>}
+      {message && <p className="success">{message}</p>}
       <form className="complaint-form" onSubmit={handleSubmit}>
         {user?.role === "admin" && (
           <>

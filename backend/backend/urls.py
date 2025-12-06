@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
-from users.views import RegisterView, LoginView, ForgotPasswordView, VerifyOTPView, ResetPasswordView
+from users.views import RegisterView, LoginView, ForgotPasswordView, VerifyOTPView, ResetPasswordView, get_profile, update_profile
 from django.conf.urls.static import static
 from pathlib import Path
 
@@ -20,6 +20,9 @@ urlpatterns = [
     path('forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
     path('verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
     path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
+    path("user/profile/", get_profile, name="get-profile"),
+    path("user/profile/update/", update_profile, name="update-profile"),
+
 
     # Complaint APIs
     path('complaints/', complaint_list, name="complaint-list"),

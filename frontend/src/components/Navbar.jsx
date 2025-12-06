@@ -4,14 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AlertsDropdown from "./AlertsDropdown";
 import ProfileDropdown from "./ProfileDropdown";
-import EditProfileModal from "./EditProfileModal";
 import "./styles/Navbar.css";
 import logoImage from "../assets/logo.png";
 
-const Navbar = ({ user, onUpdateUser }) => {
-  // user is object { id, fullName, email, avatarUrl?, role }
+const Navbar = ({ user }) => {
   const navigate = useNavigate();
-  const [showEditModal, setShowEditModal] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const onLogout = () => {
@@ -122,11 +119,8 @@ const Navbar = ({ user, onUpdateUser }) => {
               <ProfileDropdown
                 user={user}
                 onEdit={() => {
-                  setShowEditModal(true);
+                  navigate(`edit-profile`); 
                   setProfileOpen(false);
-                }}
-                onSettings={() => {
-                  /* navigate to /settings or open modal */
                 }}
                 onLogout={onLogout}
                 onClose={() => setProfileOpen(false)}
@@ -135,17 +129,6 @@ const Navbar = ({ user, onUpdateUser }) => {
           </div>
         </div>
       </header>
-
-      {showEditModal && (
-        <EditProfileModal
-          user={user}
-          onClose={() => setShowEditModal(false)}
-          onSave={(updated) => {
-            onUpdateUser && onUpdateUser(updated);
-            setShowEditModal(false);
-          }}
-        />
-      )}
     </>
   );
 };

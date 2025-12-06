@@ -3,10 +3,14 @@ import { useState } from "react";
 import "../../styles/SearchComplaint.css";
 import InputField from "../../components/InputField";
 import Button from "../../components/Button";
-import { searchComplaintForAdmin } from "../../../api/complaintApi";
-import { Link } from "react-router-dom";
-
+import {
+  searchComplaintForAdmin,
+  searchComplaintForUser,
+} from "../../../api/complaintApi";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 export default function SearchComplaintPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -14,6 +18,9 @@ export default function SearchComplaintPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const role = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).role
+    : null;
+  const email = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).email
     : null;
 
   const handleSearch = async () => {
@@ -28,7 +35,12 @@ export default function SearchComplaintPage() {
     setSuccessMessage("");
 
     try {
-      const res = await searchComplaintForAdmin(searchQuery, role);
+      let res;
+      if (role === "admin") {
+        res = await searchComplaintForAdmin(searchQuery, role);
+      } else if (role === "user") {
+        res = await searchComplaintForUser(searchQuery, role, email);
+      }
       console.log("Search response:", res);
 
       if (Array.isArray(res.data.data) && res.data.data.length > 0) {
@@ -46,8 +58,19 @@ export default function SearchComplaintPage() {
     setLoading(false);
   };
 
+      const goBack = () => {
+        if (window.history.length > 1) {
+          navigate(-1);
+        } else {
+          navigate("/"); // fallback route if no history
+        }
+      };
+
   return (
     <div className="complaint-container">
+      <button className="back-button" onClick={goBack}>
+        <ArrowLeft size={18} /> Back
+      </button>
       <h2>Search Complaint</h2>
 
       {/* ALERT MESSAGES */}
@@ -97,8 +120,8 @@ export default function SearchComplaintPage() {
                     item.status === "investigating"
                       ? "status investigating"
                       : item.status === "resolved"
-                        ? "status resolved"
-                        : "status closed"
+                      ? "status resolved"
+                      : "status closed"
                   }
                 >
                   {item.status.toUpperCase()}

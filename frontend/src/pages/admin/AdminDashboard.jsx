@@ -61,6 +61,7 @@ const AdminDashboard = () => {
   const totalReports = complaints.length;
   const pendingInvestigations = complaints.filter(c => c.status === "investigating").length;
   const resolvedCases = complaints.filter(c => c.status === "resolved").length;
+  const closedCases = complaints.filter((c) => c.status === "closed").length;
   if (loading) return <Loader />;
   return (
     <div className="dashboard-container">
@@ -84,6 +85,11 @@ const AdminDashboard = () => {
               value={resolvedCases}
               icon={<CheckCircle />}
             />
+             <DashboardCard
+            title="Closed Cases"
+            value={closedCases}
+            icon={<FileCheck />}
+          />
           </div>
 
           <div className="feed-map">

@@ -20,13 +20,12 @@
 }
 
 select {
-    width: 98%;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    width: 100%;
+    padding: 10px;
     margin-bottom: 12px;
     border: 1px solid #d1d1d1;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: large;
     background-color: white;
 }
 
@@ -37,7 +36,7 @@ select:focus {
 
 input {
     font-size: large;
-    width: 100%;
+    width: 93%;
     padding: 10px;
     margin-bottom: 12px;
     border: 1px solid #ccc;

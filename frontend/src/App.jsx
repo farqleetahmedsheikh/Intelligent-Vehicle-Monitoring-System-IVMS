@@ -16,6 +16,7 @@ import CameraMainPage from "./pages/common/Camera";
 import ConfigureCamera from "./pages/admin/ConfigureCamera";
 import VehicleDetailsPage from "./pages/common/VehicleDetails";
 import AlertDetailsPage from "./pages/common/AlertDetailsPage";
+import EditProfile from "./pages/common/EditPage";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Route path="camera" element={<CameraMainPage />} />
           <Route path="vehicle-details/:id" element={<VehicleDetailsPage />} />
           <Route path="alert-details" element={<AlertDetailsPage />} />
+          <Route path="edit-profile" element={<EditProfile />} />
         </Route>
 
         {/* ADMIN Dashboard */}
@@ -53,6 +55,7 @@ function App() {
           <Route path="camera/configure" element={<ConfigureCamera />} />
           <Route path="vehicle-details/:id" element={<VehicleDetailsPage />} />
           <Route path="alert-details" element={<AlertDetailsPage />} />
+          <Route path="edit-profile" element={<EditProfile />} />
         </Route>
       </Routes>
     </BrowserRouter>
