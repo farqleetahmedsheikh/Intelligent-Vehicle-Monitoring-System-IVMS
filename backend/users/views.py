@@ -3,15 +3,28 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegisterSerializer, UserSerializer, ForgotPasswordSerializer, VerifyOTPSerializer, ResetPasswordSerializer
-from django.core.mail import send_mail
+from .serializers import (
+    RegisterSerializer,
+    UserSerializer,
+    ForgotPasswordSerializer,
+    VerifyOTPSerializer,
+    ResetPasswordSerializer,
+    UpdateProfileSerializer
+)
+from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
 import random
 from .models import PasswordResetOTP
+from django.template.loader import render_to_string
+import logging
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
+# -----------------------------------------------------------
+# REGISTER USER
+# -----------------------------------------------------------
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
@@ -20,6 +33,27 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+
+        # Send signup email
+        try:
+            html_content = render_to_string("email/user_signup.html", {
+                "name": user.fullName,
+                "login_url": "http://localhost:5173/login",
+                "year": 2025
+            })
+
+            email = EmailMultiAlternatives(
+                subject=f"{user.role} Account Created",
+                body="",
+                from_email="Trackvision240@gmail.com",
+                to=[user.email],
+            )
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+
+        except Exception as e:
+            logger.error(f"Failed to send signup email: {e}")
+
         return Response({
             "status": "success",
             "message": f"{user.role.capitalize()} registered successfully.",
@@ -31,6 +65,10 @@ class RegisterView(generics.CreateAPIView):
             }
         }, status=status.HTTP_201_CREATED)
 
+
+# -----------------------------------------------------------
+# LOGIN USER
+# -----------------------------------------------------------
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get("email")
@@ -39,25 +77,48 @@ class LoginView(APIView):
         user = authenticate(email=email, password=password)
 
         if user:
-            # Generate tokens
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
 
             serializer = UserSerializer(user)
+            user_data = serializer.data
+
+            # Send Login Alert Email
+            try:
+                html_content = render_to_string("email/user_login_alert.html", {
+                    "name": user_data["fullName"],
+                    "time": timezone.now()
+                })
+
+                email = EmailMultiAlternatives(
+                    subject="Login Alert",
+                    body="",
+                    from_email="Trackvision240@gmail.com",
+                    to=[user_data["email"]],
+                )
+                email.attach_alternative(html_content, "text/html")
+                email.send()
+
+            except Exception as e:
+                logger.error(f"Failed to send login alert email: {e}")
 
             return Response({
                 "status": "success",
                 "message": "Login successful",
-                "user": serializer.data,
+                "user": user_data,
                 "access": access_token,
                 "refresh": str(refresh),
-            }, status=status.HTTP_200_OK)
+            })
 
         return Response(
             {"status": "error", "message": "Invalid email or password"},
             status=status.HTTP_401_UNAUTHORIZED
         )
 
+
+# -----------------------------------------------------------
+# FORGOT PASSWORD (SEND OTP)
+# -----------------------------------------------------------
 class ForgotPasswordView(APIView):
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
@@ -68,18 +129,33 @@ class ForgotPasswordView(APIView):
         otp = str(random.randint(100000, 999999))
 
         PasswordResetOTP.objects.create(user=user, otp=otp)
-        print(otp)
-        
-        send_mail(
-            subject="Password Reset OTP",
-            message=f"Your OTP for password reset is: {otp}",
-            from_email="Trackvision240@gmail.com",
-            recipient_list=[email],
-        )
-        print("Email send to user", [email])
-        return Response({"message": "OTP sent to your email.", "otp": otp}, status=status.HTTP_200_OK)
+        print(otp)  # Debug Only
+
+        try:
+            html_content = render_to_string("email/forgot_password_otp.html", {
+                "name": user.fullName,
+                "otp": otp,
+                "year": 2025
+            })
+
+            email = EmailMultiAlternatives(
+                subject="Password Reset OTP",
+                body="",
+                from_email="Trackvision240@gmail.com",
+                to=[user.email],
+            )
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+
+        except Exception as e:
+            logger.error(f"Failed to send OTP email: {e}")
+
+        return Response({"message": "OTP sent to your email.", "otp": otp})
 
 
+# -----------------------------------------------------------
+# VERIFY OTP
+# -----------------------------------------------------------
 class VerifyOTPView(APIView):
     def post(self, request):
         serializer = VerifyOTPSerializer(data=request.data)
@@ -90,16 +166,22 @@ class VerifyOTPView(APIView):
 
         try:
             user = User.objects.get(email=email)
-            otp_record = PasswordResetOTP.objects.filter(user=user, otp=otp).latest('created_at')
+            otp_record = PasswordResetOTP.objects.filter(
+                user=user, otp=otp
+            ).latest('created_at')
+
         except (User.DoesNotExist, PasswordResetOTP.DoesNotExist):
-            return Response({"error": "Invalid OTP or email"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid OTP or email"}, status=400)
 
         otp_record.is_verified = True
         otp_record.save()
 
-        return Response({"message": "OTP verified successfully."}, status=status.HTTP_200_OK)
+        return Response({"message": "OTP verified successfully."})
 
 
+# -----------------------------------------------------------
+# RESET PASSWORD
+# -----------------------------------------------------------
 class ResetPasswordView(APIView):
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
@@ -110,13 +192,65 @@ class ResetPasswordView(APIView):
 
         try:
             user = User.objects.get(email=email)
-            otp_record = PasswordResetOTP.objects.filter(user=user, is_verified=True).latest('created_at')
+            otp_record = PasswordResetOTP.objects.filter(
+                user=user, is_verified=True
+            ).latest('created_at')
+
         except (User.DoesNotExist, PasswordResetOTP.DoesNotExist):
-            return Response({"error": "OTP not verified or invalid."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "OTP not verified or invalid."}, status=400)
 
         user.set_password(new_password)
         user.save()
 
-        otp_record.delete()  # cleanup used OTP
+        otp_record.delete()
 
-        return Response({"message": "Password reset successful."}, status=status.HTTP_200_OK)
+        return Response({"message": "Password reset successful."})
+
+
+# -----------------------------------------------------------
+# GET PROFILE (by email)
+# -----------------------------------------------------------
+from rest_framework.decorators import api_view
+
+@api_view(["GET"])
+def get_profile(request):
+    email = request.GET.get("email")
+
+    if not email:
+        return Response({"error": "Email is required"}, status=400)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+
+    data = {
+        "fullName": user.fullName,
+        "email": user.email,
+        "phoneNumber": user.phoneNumber,
+    }
+    return Response(data)
+
+
+# -----------------------------------------------------------
+# UPDATE PROFILE (name + phone only)
+# -----------------------------------------------------------
+@api_view(["PUT"])
+def update_profile(request):
+    email = request.data.get("email")
+
+    if not email:
+        return Response({"error": "Email is required"}, status=400)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+
+    serializer = UpdateProfileSerializer(user, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Profile updated", "data": serializer.data})
+
+    return Response(serializer.errors, status=400)

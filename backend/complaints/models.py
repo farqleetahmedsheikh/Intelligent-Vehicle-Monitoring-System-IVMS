@@ -10,11 +10,11 @@ class Complaint(models.Model):
     # Owner Info
     ownerName = models.CharField(max_length=100)
     ownerEmail = models.EmailField()
-    ownerPhone = models.CharField(max_length=20)
+    ownerPhone = models.CharField(max_length=20, null=True, blank=True)
     ownerCnic = models.CharField(max_length=15)
 
     # Vehicle Info
-    vehiclMeake = models.CharField(max_length=50)
+    vehicleMake = models.CharField(max_length=50)
     vehicleModel = models.CharField(max_length=50)
     vehicleVariant = models.CharField(max_length=50, blank=True, null=True)
     vehicleColor = models.CharField(max_length=30)
@@ -26,7 +26,7 @@ class Complaint(models.Model):
     complaintDescription = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="investigating")
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.owner_name} — {self.plate_number}"
+        return f"{self.ownerName} — {self.plateNumber}"

@@ -19,15 +19,15 @@ This system includes:
 ivms_project/
 │
 ├── backend/              # Django backend (REST API)
-├── frontend_web/         # React Web Dashboard
-├── mobile_app/           # Flutter Mobile App
+├── frontend/         # React Web Dashboard
+├── track_vision/           # Flutter Mobile App
 ├── ai_module/            # YOLO + OCR scripts
 └── docs/                 # Documents and reports
 ```
 
 ---
 
-## ⚙️ Backend Setup (Django + SQLite)
+## ⚙️ Backend Setup (Django + MySQL)
 
 ### Requirements
 - Python 3.10+
@@ -35,14 +35,17 @@ ivms_project/
 
 ### Setup Steps
 ```bash
-cd backend
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
+cd backend
 pip install -r requirements.txt
-python manage.py makemigrations
+python manage.py makemigrations users
+python manage.py makemigrations complaints
+python manage.py makemigrations detection
+python manage.py makemigrations routes
+python manage.py makemigrations alerts
 python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
+daphne -p 8000 backend.asgi:application
 ```
 Access API at 👉 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
@@ -75,14 +78,14 @@ This uses webcam input to detect number plates and extract text.
 
 ### Setup Steps
 ```bash
-cd frontend_web
+cd frontend
 npm install
 npm run dev
 ```
 Runs on 👉 [http://localhost:5173](http://localhost:5173)
 
 ### Environment Variables
-Create `.env` in `frontend_web/`
+Create `.env` in `frontend/`
 ```env
 VITE_API_URL=http://127.0.0.1:8000
 VITE_MAPS_API_KEY=your_google_maps_key
@@ -98,7 +101,7 @@ VITE_MAPS_API_KEY=your_google_maps_key
 
 ### Setup Steps
 ```bash
-cd mobile_app
+cd track_vision
 flutter pub get
 flutter run
 ```
@@ -114,7 +117,7 @@ const String BASE_URL = "http://127.0.0.1:8000";
 
 | Component | Command | Description |
 |------------|----------|-------------|
-| Backend | `python manage.py runserver` | API & database |
+| Backend | `daphne -p 8000 backend.asgi:application` | API & database |
 | AI Module | `python recognize_plate.py` | Detects plates |
 | React | `npm run dev` | Web dashboard |
 | Flutter | `flutter run` | Mobile app |
@@ -147,9 +150,3 @@ const String BASE_URL = "http://127.0.0.1:8000";
 - Real-time route heatmaps
 - Push notifications
 - Cloud deployment (AWS / Railway / Vercel)
-
----
-<<<<<<< HEAD
-=======
-
->>>>>>> afabaa61d9b7fd4e2410b523be95091ab2994df2

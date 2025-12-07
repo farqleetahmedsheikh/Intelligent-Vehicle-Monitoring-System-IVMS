@@ -1,47 +1,27 @@
-# ----------------------------
-# Core Frameworks
-# ----------------------------
+## Minimal, compulsory backend dependencies for development
+
+# Core framework
 Django==5.0.4
 djangorestframework==3.14.0
+
+# JWT authentication (project settings reference simplejwt)
+djangorestframework-simplejwt
+
+# CORS (needed if frontend runs on separate origin)
 django-cors-headers==3.13.0
 
-# ----------------------------
-# Database
-# ----------------------------
-#sqlite3-binary==0.0.1  # SQLite for local dev (Python built-in, optional)
+# Database driver (traceback used PyMySQL)
+PyMySQL
+mysqlclient==2.2.4
 
-# ----------------------------
-# Image Processing & AI Modules
-# ----------------------------
-opencv-python==4.10.0.84
-numpy==1.26.4
-torch==2.3.0
-torchvision==0.18.0
-ultralytics==8.2.0     # YOLOv11
-pytesseract==0.3.10    # OCR text detection
-Pillow==10.3.0
+# Channels + WebSockets
+channels==4.0.0
+channels-redis==4.1.0
+daphne==4.0.0
 
-# ----------------------------
-# Location & Maps
-# ----------------------------
-geopy==2.4.1
+# Image handling
+Pillow==9.5.0
+
+# Environment and HTTP
+python-dotenv==1.0.1
 requests==2.32.3
-
-# ----------------------------
-# Utility & Server Tools
-# ----------------------------
-python-dotenv==1.0.1   # For environment variables
-gunicorn==22.0.0       # For production server
-whitenoise==6.6.0      # For static files in Django
-
-# ----------------------------
-# Optional: For Testing & Logging
-# ----------------------------
-pytest==8.2.0
-loguru==0.7.2
-
-# ----------------------------
-# Machine Learning (optional future use)
-# ----------------------------
-scikit-learn==1.5.0
-pandas==2.2.2

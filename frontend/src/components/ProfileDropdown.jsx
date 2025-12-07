@@ -2,7 +2,7 @@
 
 import "./styles/ProfileDropdown.css";
 
-const ProfileDropdown = ({ user, onEdit, onSettings, onLogout, onClose }) => {
+const ProfileDropdown = ({ user, onEdit, onLogout, onClose }) => {
   return (
     <div className="profile-dropdown" role="menu" aria-label="Profile options">
       <div className="profile-top">
@@ -24,13 +24,6 @@ const ProfileDropdown = ({ user, onEdit, onSettings, onLogout, onClose }) => {
           }}
         >
           <span>Profile</span>
-        </li>
-        <li
-          onClick={() => {
-            onSettings();
-          }}
-        >
-          <span>Settings</span>
         </li>
         <li
           className="danger"

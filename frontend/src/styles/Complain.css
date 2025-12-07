@@ -1,5 +1,3 @@
-/* Container for both pages */
-/* Container for main complaints page */
 .complaint-main-container {
     background: var(--bg-light);
     padding: 20px 30px;
@@ -140,4 +138,41 @@ textarea {
 
 .search-result-item p {
     margin: 3px 0;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    /* space between icon and text */
+    background: none;
+    border: none;
+    color: var(--accent-blue);
+    font-size: 16px;
+    padding: 5px 0;
+    transition: all 0.5s ease;
+}
+
+.back-button:hover {
+    transition: all 0.3s ease;
+    color: var(--primary-blue);
+    background: none;
+}
+
+.error {
+    background: #ffdddd;
+    padding: 10px;
+    border-left: 4px solid #ff4d4d;
+    color: #a60000;
+    margin-bottom: 12px;
+    border-radius: 4px;
+}
+
+.success {
+    background: #ddffdd;
+    padding: 10px;
+    border-left: 4px solid #4dff4d;
+    color: #006600;
+    margin-bottom: 12px;
+    border-radius: 4px;
 }
