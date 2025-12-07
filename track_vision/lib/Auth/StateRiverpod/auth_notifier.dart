@@ -1,16 +1,14 @@
-
 import 'dart:convert';
 
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:track_vision/Auth/StateRiverpod/auth_state.dart';
-import 'package:track_vision/Auth/admin_model.dart';
 import 'package:track_vision/Auth/auth_services.dart';
 import 'package:track_vision/Auth/user_model.dart';
 
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>(
-    (ref) => AuthNotifier(),
+  (ref) => AuthNotifier(),
 );
 
 class AuthNotifier extends StateNotifier<AuthState> {
@@ -25,7 +23,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final userJson = prefs.getString('user');
     final access = await _secureStorage.read(key: 'access');
     final refresh = await _secureStorage.read(key: 'refresh');
-// user sign up conditions
+    // user sign up conditions
     if (userJson != null && access != null) {
       final user = UserModel.fromJson(jsonDecode(userJson));
       state = AuthState(
@@ -44,35 +42,36 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> _saveToStorage({
     UserModel? user,
     required String access,
-    String? refresh}) async {
+    String? refresh,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
-    if(user != null){
+    if (user != null) {
       await prefs.setString('user', jsonEncode(user.toJson()));
     }
     await _secureStorage.write(key: 'access', value: access);
-    if (refresh != null && refresh.isNotEmpty) await _secureStorage.write(key: 'refresh', value: refresh);
-    }
-
+    if (refresh != null && refresh.isNotEmpty)
+      await _secureStorage.write(key: 'refresh', value: refresh);
+  }
 
   // LogIn
   Future<void> login(String email, String password) async {
     state = AuthState(
-        status: AuthStatus.loading,
-        user: null,
-        admin: null,
-        access: null,
-        refresh: null,
-        message: null
+      status: AuthStatus.loading,
+      user: null,
+      admin: null,
+      access: null,
+      refresh: null,
+      message: null,
     );
     try {
       final res = await AuthServices.login(email, password);
       print('Login Response: $res');
 
-      final bool isSuccess = (res['success'] == true) || (res['status']);
+      final bool isSuccess = res['success'] == true;
 
       if (!isSuccess) {
         state = AuthState(
-          status: AuthStatus.authenticated,
+          status: AuthStatus.error,
           user: null,
           admin: null,
           access: null,
@@ -81,7 +80,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
         return;
       }
-      final data = (res['data'] is Map<String, dynamic>) ? res['data'] : res;
+      final data = res['data'] as Map<String, dynamic>;
 
       final userJson = data['user'] as Map<String, dynamic>;
       final user = UserModel.fromJson(userJson);
@@ -89,10 +88,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final access = (data['access'] ?? data['token'] ?? '') as String;
       final refresh = (data['refresh'] ?? '') as String;
 
-      await _saveToStorage(
-          user: user,
-          refresh: refresh,
-          access: access);
+      await _saveToStorage(user: user, refresh: refresh, access: access);
       state = AuthState(
         status: AuthStatus.authenticated,
         user: user,
@@ -114,104 +110,93 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-      // SignUp for user
-      Future<void> signupUser(Map<String, dynamic> payload) async {
-        state = state.copyWith(status: AuthStatus.loading,
-            message: null);
-        final res = await AuthServices.signupUser(payload);
-        if (res['success'] == true) {
-          state = state.copyWith(
-              status: AuthStatus.unauthenticated,
-              message: 'User signed up successfully'
-          );
-        } else {
-          state = state.copyWith(
-            status: AuthStatus.error,
-            message: res['message'].toString(),
-          );
-        }
-      }
-
-      // Sign Up for admin
-      Future<void> signupAdmin(Map<String, dynamic> payload) async {
-        state = state.copyWith(status: AuthStatus.loading,
-            message: null);
-        final res = await AuthServices.signupAdmin(payload);
-        if (res['success'] == true) {
-          state = state.copyWith(
-              status: AuthStatus.unauthenticated,
-              message: 'Admin Signup Successfully'
-          );
-        } else {
-          state = state.copyWith(
-            status: AuthStatus.error,
-            message: res['message'].toString(),
-          );
-        }
-      }
-
-      // Forgot Password
-      Future<void> forgotPassword(String email) async {
-        state = state.copyWith(
-          status: AuthStatus.loading,
-          message: null,
-        );
-        final res = await AuthServices.forgotPassword(email);
-        if (res['success'] == true) {
-          state = state.copyWith(
-            status: AuthStatus.unauthenticated,
-            message: 'OTP sent to email',
-          );
-        } else {
-          state = state.copyWith(status: AuthStatus.error,
-              message: res['message']?.toString());
-        }
-      }
-
-      // Verify OTP
-      Future<void> verifyOtp(String email, String otp) async {
-        state = state.copyWith(
-            status: AuthStatus.loading,
-            message: null
-        );
-        final res = await AuthServices.verifyOtp(email, otp);
-        if (res['success'] == true) {
-          state = state.copyWith(
-              status: AuthStatus.unauthenticated,
-              message: 'OTP verified, reset your password.');
-        } else {
-          state = state.copyWith(
-              status: AuthStatus.error,
-              message: res['message'] ?? 'Something went wrong'
-          );
-        }
-      }
-
-      // reset password
-      Future<void> resetPassword(String newPassword,
-          String confirmPassword) async {
-        state = state.copyWith(
-          status: AuthStatus.loading,
-          message: null,
-        );
-        final res = await AuthServices.resetPassword(
-            newPassword, confirmPassword);
-        if (res['success'] == true) {
-          state = state.copyWith(
-              status: AuthStatus.unauthenticated,
-              message: 'Password reset Successfully, please login'
-          );
-        }
-      }
-
-      // Logout
-      Future<void> logout() async {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('user');
-        await prefs.remove('admin');
-        await _secureStorage.delete(key: 'access');
-        await _secureStorage.delete(key: 'refresh');
-        state = AuthState(status: AuthStatus.unauthenticated);
-      }
+  // SignUp for user
+  Future<void> signupUser(Map<String, dynamic> payload) async {
+    state = state.copyWith(status: AuthStatus.loading, message: null);
+    final res = await AuthServices.signupUser(payload);
+    if (res['success'] == true) {
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        message: 'User signed up successfully',
+      );
+    } else {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        message: res['message'].toString(),
+      );
     }
+  }
 
+  // Sign Up for admin
+  Future<void> signupAdmin(Map<String, dynamic> payload) async {
+    state = state.copyWith(status: AuthStatus.loading, message: null);
+    final res = await AuthServices.signupAdmin(payload);
+    if (res['success'] == true) {
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        message: 'Admin Signup Successfully',
+      );
+    } else {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        message: res['message'].toString(),
+      );
+    }
+  }
+
+  // Forgot Password
+  Future<void> forgotPassword(String email) async {
+    state = state.copyWith(status: AuthStatus.loading, message: null);
+    final res = await AuthServices.forgotPassword(email);
+    if (res['success'] == true) {
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        message: 'OTP sent to email',
+      );
+    } else {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        message: res['message']?.toString(),
+      );
+    }
+  }
+
+  // Verify OTP
+  Future<void> verifyOtp(String email, String otp) async {
+    state = state.copyWith(status: AuthStatus.loading, message: null);
+    final res = await AuthServices.verifyOtp(email, otp);
+    if (res['success'] == true) {
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        message: 'OTP verified, reset your password.',
+      );
+    } else {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        message: res['message'] ?? 'Something went wrong',
+      );
+    }
+  }
+
+  // reset password
+  Future<void> resetPassword(String newPassword, String confirmPassword) async {
+    state = state.copyWith(status: AuthStatus.loading, message: null);
+    final res = await AuthServices.resetPassword(newPassword, confirmPassword);
+    if (res['success'] == true) {
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        message: 'Password reset Successfully, please login',
+      );
+    }
+  }
+
+  // Logout
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user');
+    await prefs.remove('admin');
+    await _secureStorage.delete(key: 'access');
+    await _secureStorage.delete(key: 'refresh');
+    state = AuthState(status: AuthStatus.unauthenticated);
+  }
+}

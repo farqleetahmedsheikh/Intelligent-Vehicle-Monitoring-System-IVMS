@@ -1,14 +1,12 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:track_vision/Auth/admin/detection_provider.dart';
 
-
-class DetectionDetailPage extends StatelessWidget{
-  final Detection detection ;
-  const DetectionDetailPage(this.detection,{super.key});
+class DetectionDetailPage extends StatelessWidget {
+  final Detection detection;
+  const DetectionDetailPage(this.detection, {super.key});
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -16,7 +14,6 @@ class DetectionDetailPage extends StatelessWidget{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             // Car image
             Container(
               height: 180,
@@ -24,7 +21,9 @@ class DetectionDetailPage extends StatelessWidget{
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 image: const DecorationImage(
-                  image: AssetImage("assets/images/car.png"),  // <-- EDIT THIS PATH LATER
+                  image: AssetImage(
+                    "assets/images/car.png",
+                  ), // <-- EDIT THIS PATH LATER
                   fit: BoxFit.cover,
                 ),
               ),
@@ -81,7 +80,6 @@ class DetectionDetailPage extends StatelessWidget{
           ],
         ),
       ),
-
     );
   }
 }

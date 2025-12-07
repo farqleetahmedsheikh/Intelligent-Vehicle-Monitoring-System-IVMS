@@ -5,6 +5,15 @@ __pycache__/
 db.sqlite3
 *.sqlite3
 *.db
+
 # Virtual environment
 venv/
 .venv/
+
+# Flutter/Dart
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/pubspec.lock
