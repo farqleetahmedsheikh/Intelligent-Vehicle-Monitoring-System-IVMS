@@ -79,7 +79,7 @@ export default function VehicleDetailsPage() {
           {complaint.vehiclePicture && (
             <div className="vehicle-image-box">
               <img
-                src={`http://localhost:8000/${complaint.vehiclePicture}`}
+                src={`http://localhost:8000${complaint.vehiclePicture}`}
                 alt="Vehicle"
                 className="vehicle-image"
               />

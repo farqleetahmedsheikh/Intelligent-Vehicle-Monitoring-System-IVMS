@@ -15,8 +15,10 @@ import ComplaintMainPage from "./pages/common/MainComplaint";
 import CameraMainPage from "./pages/common/Camera";
 import ConfigureCamera from "./pages/admin/ConfigureCamera";
 import VehicleDetailsPage from "./pages/common/VehicleDetails";
-import AlertDetailsPage from "./pages/common/AlertDetailsPage";
 import EditProfile from "./pages/common/EditPage";
+import AlertsPage from "./pages/common/AlertPage";
+import ComplaintsPage from "./pages/user/CompaintPage";
+import AdminComplaints from "./pages/admin/AdminComplaint";
 
 function App() {
   return (
@@ -40,8 +42,9 @@ function App() {
           <Route path="complain/submit" element={<SubmitComplaintPage />} />
           <Route path="camera" element={<CameraMainPage />} />
           <Route path="vehicle-details/:id" element={<VehicleDetailsPage />} />
-          <Route path="alert-details" element={<AlertDetailsPage />} />
+          <Route path="alerts" element={<AlertsPage />} />
           <Route path="edit-profile" element={<EditProfile />} />
+          <Route path="my-complaints" element={<ComplaintsPage />} />
         </Route>
 
         {/* ADMIN Dashboard */}
@@ -54,8 +57,9 @@ function App() {
           <Route path="camera" element={<CameraMainPage />} />
           <Route path="camera/configure" element={<ConfigureCamera />} />
           <Route path="vehicle-details/:id" element={<VehicleDetailsPage />} />
-          <Route path="alert-details" element={<AlertDetailsPage />} />
+          <Route path="alerts" element={<AlertsPage />} />
           <Route path="edit-profile" element={<EditProfile />} />
+          <Route path="my-complaints" element={<AdminComplaints />} />
         </Route>
       </Routes>
     </BrowserRouter>

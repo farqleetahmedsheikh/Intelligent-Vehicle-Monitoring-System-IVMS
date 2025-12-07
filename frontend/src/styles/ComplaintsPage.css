@@ -1,0 +1,28 @@
+.complaints-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 cards per row */
+    gap: 20px;
+    /* space between cards */
+}
+
+.complaints-container h2 {
+    grid-column: 1 / -1;
+    /* Heading spans both columns */
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #222;
+    text-align: center;
+}
+
+.complaints-container p {
+    font-size: 1rem;
+    color: #555;
+}
+
+.complaints-container .complaint-card {
+    margin-bottom: 15px;
+}

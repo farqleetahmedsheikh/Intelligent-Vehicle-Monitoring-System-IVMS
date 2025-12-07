@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # Third-party
     'rest_framework',
     'corsheaders',
+    "channels",
 
     # Local apps
     'complaints',
@@ -53,6 +54,14 @@ INSTALLED_APPS = [
     "alerts",
 ]
 
+ASGI_APPLICATION = "backend.asgi.application"
+
+# Redis backend for channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -181,5 +190,5 @@ EMAIL_HOST_PASSWORD = 'effl pesz xmht dzrk'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR.parent / 'backend/vehicle_pictures',  # <-- your images folder
+    BASE_DIR/'/vehicle_pictures',  # <-- your images folder
 ]

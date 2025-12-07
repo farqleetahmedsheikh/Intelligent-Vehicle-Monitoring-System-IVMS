@@ -3,7 +3,7 @@
 import { useNavigate } from "react-router-dom";
 import DashboardCard from "../../components/DashboardCard";
 import "../../styles/Dashboard.css";
-import { FileText, Search, CheckCircle, User } from "lucide-react";
+import { FileText, Search, CheckCircle, FileCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import Loader from "../../components/Loader";
 import { fetchAllComplaints } from "../../../api/complaintApi";

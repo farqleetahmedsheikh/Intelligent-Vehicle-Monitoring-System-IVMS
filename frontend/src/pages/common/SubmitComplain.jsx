@@ -6,6 +6,7 @@ import Button from "../../components/Button";
 import { registerComplaint } from "../../../api/complaintApi";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Loader from "../../components/Loader";
 
 export default function SubmitComplaintPage() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function SubmitComplaintPage() {
     : null;
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     ownerName: "",
     ownerEmail: "",
@@ -47,7 +49,7 @@ export default function SubmitComplaintPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     // Auto fill user data if user is normal user
     let finalData = { ...formData };
     if (user && user.role === "user") {
@@ -89,9 +91,11 @@ export default function SubmitComplaintPage() {
     } catch (error) {
       setError("Something went wrong! Try again");
       console.error("Error submitting complaint:", error);
+    } finally {
+      setLoading(false);
     }
   };
-
+  if (loading) return <Loader />;
   return (
     <div className="complaint-container">
       <button className="back-button" onClick={goBack}>

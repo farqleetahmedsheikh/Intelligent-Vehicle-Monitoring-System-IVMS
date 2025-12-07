@@ -66,7 +66,7 @@ const AlertsDropdown = () => {
       </div>
 
       <div className="alerts-footer">
-        <a href="/alerts">View all alerts</a>
+        <a href="alerts">View all alerts</a>
       </div>
     </div>
   );

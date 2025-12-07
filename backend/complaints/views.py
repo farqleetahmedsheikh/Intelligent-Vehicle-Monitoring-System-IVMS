@@ -119,3 +119,21 @@ def get_complaint(request, complaint_id):
 
     serializer = ComplaintSerializer(complaint)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_all_complaints(request):
+    complaints = Complaint.objects.all().order_by("-id")
+    serializer = ComplaintSerializer(complaints, many=True)
+    return Response(serializer.data)
+
+@api_view(["PATCH"])
+def update_complaint_status(request, id):
+    try:
+        complaint = Complaint.objects.get(id=id)
+    except Complaint.DoesNotExist:
+        return Response({"error": "Not found"}, status=404)
+
+    status_value = request.data.get("status")
+    complaint.status = status_value
+    complaint.save()
+    return Response({"success": True})
