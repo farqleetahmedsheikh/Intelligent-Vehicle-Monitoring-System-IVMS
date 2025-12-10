@@ -15,6 +15,7 @@ export default function ComplaintsPage() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const email = user?.email;
+  const role = user?.role;
 
   useEffect(() => {
     const fetchComplaints = async () => {

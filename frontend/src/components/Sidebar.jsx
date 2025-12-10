@@ -39,7 +39,7 @@ const Sidebar = () => {
               isActive ? "sidebar-link active" : "sidebar-link"
             }
           >
-            <BadgeAlert size={18} /> My Complaints
+            <BadgeAlert size={18} /> {role === "admin" ? "Manage Complaints" : "My Complaints"}
           </NavLink>
         </li>
 

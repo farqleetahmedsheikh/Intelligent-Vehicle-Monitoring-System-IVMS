@@ -19,6 +19,7 @@ import EditProfile from "./pages/common/EditPage";
 import AlertsPage from "./pages/common/AlertPage";
 import ComplaintsPage from "./pages/user/CompaintPage";
 import AdminComplaints from "./pages/admin/AdminComplaint";
+import NotFound from "./pages/common/NotFoundPage";
 
 function App() {
   return (
@@ -35,7 +36,7 @@ function App() {
 
         {/* USER Dashboard */}
         <Route path="/user/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} /> {/* /user/dashboard */}
+          <Route index element={<Dashboard />} />
           <Route path="home" element={<Dashboard />} />
           <Route path="complain" element={<ComplaintMainPage />} />
           <Route path="complain/search" element={<SearchComplaintPage />} />
@@ -49,7 +50,7 @@ function App() {
 
         {/* ADMIN Dashboard */}
         <Route path="/admin/dashboard" element={<DashboardLayout />}>
-          <Route index element={<AdminDashboard />} /> {/* /admin/dashboard */}
+          <Route index element={<AdminDashboard />} />
           <Route path="home" element={<AdminDashboard />} />
           <Route path="complain" element={<ComplaintMainPage />} />
           <Route path="complain/search" element={<SearchComplaintPage />} />
@@ -61,7 +62,10 @@ function App() {
           <Route path="edit-profile" element={<EditProfile />} />
           <Route path="my-complaints" element={<AdminComplaints />} />
         </Route>
+        {/* 404 PAGE — must be last */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
+      
     </BrowserRouter>
   );
 }

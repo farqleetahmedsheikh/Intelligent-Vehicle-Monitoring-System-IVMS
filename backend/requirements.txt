@@ -20,7 +20,7 @@ channels-redis==4.1.0
 daphne==4.0.0
 
 # Image handling
-Pillow==9.5.0
+Pillow==10.3.0
 
 # Environment and HTTP
 python-dotenv==1.0.1

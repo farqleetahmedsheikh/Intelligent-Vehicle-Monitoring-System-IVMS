@@ -103,12 +103,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'visiontrack_db',
         'USER': 'root',
-        'PASSWORD': '',  # leave empty if no password
+        'PASSWORD': 'root',  # leave empty if no password
         'HOST': '127.0.0.1',
         'PORT': '3306',
-         'OPTIONS': {
-            'unix_socket': '/opt/local/var/run/mariadb-10.11/mysqld.sock',
-        },
+        #  'OPTIONS': {
+        #     'unix_socket': '/opt/local/var/run/mariadb-10.11/mysqld.sock',
+        # },
     }
 }
 
