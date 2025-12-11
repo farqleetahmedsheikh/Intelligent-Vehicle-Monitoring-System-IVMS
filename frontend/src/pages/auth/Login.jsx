@@ -22,14 +22,14 @@ export default function Login() {
     : null;
   const accessToken = localStorage.getItem("access") || null;
   useEffect(() => {
-    if (accessToken && user && user.role) {
+    if (accessToken && user.role) {
       if (user.role === "admin") {
         navigate("/admin/dashboard/home");
         return;
       }
       navigate("/user/dashboard/home");
     }
-  }, [navigate, accessToken, user]);
+  }, [navigate, accessToken, user?.role]);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -15,14 +15,8 @@ const AdminDashboard = () => {
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
-  const accessToken = localStorage.getItem("access") || null;
 
   useEffect(() => {
-    if (!accessToken || !user || user.role !== "admin") {
-      navigate("/login");
-      return;
-    }
-
     const fetchComplaints = async () => {
       console.log("Fetching complaints for user:", user.email);
       try {
@@ -42,7 +36,7 @@ const AdminDashboard = () => {
     fetchComplaints();
 
     // Only run when user.email changes (instead of full user object)
-  }, [navigate, accessToken, user?.email]);
+  }, [navigate, user?.email]);
 
   const detections = [
     {

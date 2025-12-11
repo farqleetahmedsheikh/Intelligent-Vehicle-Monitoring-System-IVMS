@@ -12,19 +12,24 @@ export default function ComplaintsPage() {
   const [complaints, setComplaints] = useState([]);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 5; // complaints per page
 
   const user = JSON.parse(localStorage.getItem("user"));
   const email = user?.email;
-  const role = user?.role;
 
   useEffect(() => {
     const fetchComplaints = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(`${API}complaints/`, {
-          params: { email },
+          params: { email, page: currentPage, limit },
         });
-        console.log("Fetched complaints:", res.data.complaints);
         setComplaints(res.data.complaints || []);
+        console.log("Fetched complaints data:", res);
+        const total = res.data.total || 0;
+        setTotalPages(Math.ceil(total / limit));
       } catch (err) {
         console.error("Error fetching complaints:", err);
       } finally {
@@ -33,9 +38,12 @@ export default function ComplaintsPage() {
     };
 
     fetchComplaints();
-  }, [email]);
+  }, [email, currentPage]);
 
   if (loading) return <Loader />;
+
+  const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
+  const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
 
   return (
     <div className="complaints-container">
@@ -51,6 +59,18 @@ export default function ComplaintsPage() {
           />
         ))
       )}
+
+      <div className="pagination">
+        <button onClick={handlePrev} disabled={currentPage === 1}>
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button onClick={handleNext} disabled={currentPage === totalPages}>
+          Next
+        </button>
+      </div>
 
       <ComplaintDetailModal
         complaint={selectedComplaint}

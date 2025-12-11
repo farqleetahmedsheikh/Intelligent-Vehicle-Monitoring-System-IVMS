@@ -4,7 +4,7 @@ from rest_framework import status
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from django.core.paginator import Paginator, EmptyPage
 from .models import Complaint
 from .serializers import ComplaintSerializer
 import logging
@@ -70,13 +70,11 @@ def search_complaint(request):
     is_cnic = query.replace('-', '').isdigit() and len(query.replace('-', '')) in [13, 14]
     is_plate = any(c.isalpha() for c in query) and any(c.isdigit() for c in query)
     is_chassis = len(query) > 10 and query.isalnum()
-    print("Search query:", query, "is_cnic:", is_cnic, "is_plate:", is_plate, "is_chassis:", is_chassis)
+
     if is_cnic:
         complaints = Complaint.objects.filter(ownerCnic=query)
     elif is_plate:
-        print("Searching complaints by plate number:", query)
         complaints = Complaint.objects.filter(plateNumber__iexact=query)
-        print("Complaints found for plate number", query, ":", complaints)
     elif is_chassis:
         complaints = Complaint.objects.filter(chassisNumber__iexact=query)
     else:
@@ -91,7 +89,6 @@ def search_complaint(request):
     # Restrict normal users
     
     if role != 'admin':
-        print("Searching complaints for user:", "with query:", query)
         complaints = complaints.filter(ownerEmail=email)
 
     serializer = ComplaintSerializer(complaints, many=True)
@@ -99,17 +96,35 @@ def search_complaint(request):
 
 @api_view(['GET'])
 def complaint_list(request):
-    userEmail = request.GET.get('email')
+    userEmail = request.GET.get('email', None)
+    page = int(request.GET.get('page', 1))
+    limit = int(request.GET.get('limit', 10))
 
+    # Use filter only if userEmail is non-empty string
     if userEmail:
-        complaints = Complaint.objects.filter(ownerEmail=userEmail).order_by('-createdAt')
+        complaints_queryset = Complaint.objects.filter(ownerEmail=userEmail).order_by('-createdAt')
     else:
-        complaints = Complaint.objects.all().order_by('-createdAt')
+        # Optional: for admin only
+        complaints_queryset = Complaint.objects.all().order_by('-createdAt')
 
-    serializer = ComplaintSerializer(complaints, many=True)
-    print("Complaints fetched for", userEmail, ":", serializer.data)
-    return Response({"complaints": serializer.data})
+    paginator = Paginator(complaints_queryset, limit)
 
+    try:
+        complaints_page = paginator.page(page)
+    except EmptyPage:
+        complaints_page = []
+
+    serializer = ComplaintSerializer(complaints_page, many=True)
+    
+    print ("Returning complaints page:", page, "with limit:", limit, "Total complaints:", paginator.count)
+
+    return Response({
+        "total": paginator.count,
+        "page": page,
+        "limit": limit,
+        "complaints": serializer.data
+    })
+    
 @api_view(['GET'])
 def get_complaint(request, complaint_id):
     try:
