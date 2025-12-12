@@ -24,6 +24,8 @@ export default function SearchComplaintPage() {
     : null;
 
   const handleSearch = async () => {
+    setError("");
+    setSuccessMessage("");
     console.log("Searching for:", searchQuery, "With role:", role);
     if (!searchQuery.trim()) {
       setError("Please enter Plate Number, CNIC or Chassis Number.");
@@ -31,8 +33,6 @@ export default function SearchComplaintPage() {
     }
 
     setLoading(true);
-    setError("");
-    setSuccessMessage("");
 
     try {
       let res;
@@ -52,19 +52,19 @@ export default function SearchComplaintPage() {
       }
     } catch (err) {
       setResults([]);
-      setError(err.response?.data?.error || "Something went wrong!");
+      setError(err.response?.data || "Something went wrong!");
     }
 
     setLoading(false);
   };
 
-      const goBack = () => {
-        if (window.history.length > 1) {
-          navigate(-1);
-        } else {
-          navigate("/"); // fallback route if no history
-        }
-      };
+  const goBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/"); // fallback route if no history
+    }
+  };
 
   return (
     <div className="complaint-container">
@@ -88,7 +88,7 @@ export default function SearchComplaintPage() {
         />
 
         <Button
-          style={{ width: "20%" }}
+          style={{ width: "20%", color: "#fff" }}
           label={loading ? "Searching..." : "Search"}
           onClick={handleSearch}
           disabled={loading}
@@ -120,14 +120,14 @@ export default function SearchComplaintPage() {
                     item.status === "investigating"
                       ? "status investigating"
                       : item.status === "resolved"
-                      ? "status resolved"
-                      : "status closed"
+                        ? "status resolved"
+                        : "status closed"
                   }
                 >
                   {item.status.toUpperCase()}
                 </span>
               </p>
-              <Link to={`/${role}/dashboard/vehicle-details/${item.id}`}>
+              <Link to={`/${role}/dashboard/vehicle-details/${item.id}`} className="view-more-link">
                 View More
               </Link>
             </div>

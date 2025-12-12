@@ -65,7 +65,7 @@ export default function ComplaintsPage() {
           Previous
         </button>
         <span>
-          Page {currentPage} of {totalPages}
+          {currentPage} of {totalPages}
         </span>
         <button onClick={handleNext} disabled={currentPage === totalPages}>
           Next

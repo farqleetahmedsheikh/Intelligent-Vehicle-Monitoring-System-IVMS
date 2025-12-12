@@ -47,15 +47,18 @@
 
 /* Vehicle status colors */
 .status.investigating {
-  background: #ff3b30; /* Bright Red - urgent and alerting */
+  background: #ff3b30;
+  color: #fff;
 }
 
 .status.resolved {
-   background: #0c884a;
+  background: #0c884a;
+  color: #fff;
 }
 
 .status.closed {
-  background: #ff9f10; 
+  background: #ff9f10;
+  color: #fff;
 }
 
 .vehicle-table td.status {
@@ -64,7 +67,7 @@
   padding: 8px 14px;
   border-radius: 8px;
   display: inline-block;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: all 0.3s ease, color 0.3s ease;
   color: white;
   font-size: 12px;
 }

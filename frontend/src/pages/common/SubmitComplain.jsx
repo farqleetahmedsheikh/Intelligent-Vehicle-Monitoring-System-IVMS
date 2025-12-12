@@ -114,6 +114,7 @@ export default function SubmitComplaintPage() {
                 name="ownerEmail"
                 type="email"
                 value={formData.ownerEmail}
+                placeholder={"Ex. example@example.com"}
                 onChange={handleChange}
                 style={{ width: "90%" }}
               />
@@ -123,6 +124,7 @@ export default function SubmitComplaintPage() {
                 name="ownerPhone"
                 type="text"
                 value={formData.ownerPhone}
+                placeholder={"Ex. 0332332332"}
                 onChange={handleChange}
                 style={{ width: "90%" }}
               />
@@ -133,6 +135,7 @@ export default function SubmitComplaintPage() {
               name="ownerCnic"
               type="text"
               value={formData.ownerCnic}
+              placeholder={"Ex. 32123-1233231-2"}
               onChange={handleChange}
               style={{ width: "90%" }}
             />
@@ -146,6 +149,7 @@ export default function SubmitComplaintPage() {
             label="Make"
             name="vehicleMake"
             value={formData.vehicleMake}
+            placeholder={"Ex. Honda"}
             onChange={handleChange}
             style={{ width: "90%" }}
           />
@@ -154,6 +158,7 @@ export default function SubmitComplaintPage() {
             label="Model"
             name="vehicleModel"
             value={formData.vehicleModel}
+            placeholder={"Ex. 2025"}
             onChange={handleChange}
             style={{ width: "90%" }}
           />
@@ -164,6 +169,7 @@ export default function SubmitComplaintPage() {
             label="Variant"
             name="vehicleVariant"
             value={formData.vehicleVariant}
+            placeholder={"Ex. VXL"}
             onChange={handleChange}
             style={{ width: "90%" }}
           />
@@ -173,6 +179,7 @@ export default function SubmitComplaintPage() {
             name="vehicleColor"
             value={formData.vehicleColor}
             onChange={handleChange}
+            placeholder={"Ex. Black"}
             style={{ width: "90%" }}
           />
         </div>
@@ -182,6 +189,7 @@ export default function SubmitComplaintPage() {
             label="Plate Number"
             name="plateNumber"
             value={formData.plateNumber}
+            placeholder={"Ex. AAA-123"}
             onChange={handleChange}
             style={{ width: "90%" }}
           />
@@ -190,6 +198,7 @@ export default function SubmitComplaintPage() {
             label="Chassis Number"
             name="chassisNumber"
             value={formData.chassisNumber}
+            placeholder={"Ex. 4562ASA5621"}
             onChange={handleChange}
             style={{ width: "90%" }}
           />
@@ -200,6 +209,7 @@ export default function SubmitComplaintPage() {
           name="complaintDescription"
           rows="4"
           value={formData.complaintDescription}
+          placeholder={"Ex. White Honda Civic got stolen on 12th May from main murree road..."}
           onChange={handleChange}
         />
 

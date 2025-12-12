@@ -29,11 +29,9 @@
 
 .complaint-card strong {
     color: #007bff;
-    /* Highlight status */
 }
 
 .complaint-card button {
     align-self: flex-start;
-    /* Align button to the left */
     margin-top: 10px;
 }
