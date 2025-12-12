@@ -9,7 +9,7 @@
 
 .complaint-main-container p {
     margin-bottom: 30px;
-    color: #555;
+    color: var(--text);
 }
 
 .complaint-options {
