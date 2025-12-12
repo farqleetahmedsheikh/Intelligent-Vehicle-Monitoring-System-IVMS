@@ -85,7 +85,7 @@ export default function Login() {
           value={formData.password}
           onChange={handleChange}
         />
-        <Button type="submit" label="Login" />
+        <Button type="submit" label="Login" style={{color:"#fff"}}/>
         <AuthLinks
           leftText="Forgot password?"
           leftTo="/forgot-password"

@@ -36,6 +36,7 @@ const Navbar = ({ user }) => {
   }, [darkMode]);
 
   const onLogout = () => {
+    document.body.setAttribute("data-theme", "light");
     localStorage.clear();
     navigate("/login");
   };

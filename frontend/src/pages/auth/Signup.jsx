@@ -140,7 +140,7 @@ export default function Signup() {
           onChange={handleChange}
         />
 
-        <Button type="submit" label="Sign Up" />
+        <Button type="submit" label="Sign Up" style={{color:"#fff"}}/>
 
         <AuthLinks rightText="Already have an account" rightTo="/login" />
       </form>

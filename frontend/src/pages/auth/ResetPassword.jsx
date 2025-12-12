@@ -48,7 +48,7 @@ export default function Login() {
           value={formData.new_password}
           onChange={handleChange}
         />
-        <Button type="submit" label="Login" />
+        <Button type="submit" label="Reset" style={{color:"#fff"}} />
       </form>
     </div>
   );

@@ -45,7 +45,7 @@ export default function Login() {
           value={formData.email}
           onChange={handleChange}
         />
-        <Button type="submit" label="Forgot" />
+        <Button type="submit" label="Forgot" style={{color:"#fff"}} />
         <AuthLinks
           leftText="Already have an account?"
           leftTo="/login"
