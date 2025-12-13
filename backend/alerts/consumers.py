@@ -4,7 +4,6 @@ import json
 class AlertConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         user_id = self.scope['url_route']['kwargs'].get('user_id')
-        print(f"User ID from URL: {user_id}")
         self.group_name = f"alerts_{user_id}" if user_id else "alerts_admin"
 
         # Join group

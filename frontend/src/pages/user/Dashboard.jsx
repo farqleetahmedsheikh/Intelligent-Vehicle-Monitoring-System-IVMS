@@ -19,12 +19,10 @@ const Dashboard = () => {
     ? JSON.parse(localStorage.getItem("user"))
     : null;
   const accessToken = localStorage.getItem("access") || null;
-  console.log("Access Token:", accessToken);
 
   // Redirects to login if not authenticated
   useEffect(() => {
     const fetchComplaints = async () => {
-      console.log("Fetching complaints for user:", user.email);
       try {
         setLoading(true);
         const response = await fetchUserComplaints(user.email);

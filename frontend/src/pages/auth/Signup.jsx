@@ -49,15 +49,13 @@ export default function Signup() {
     setMessage("");
     setError("");
 
-    console.log("Submitting: ", formData);
-
     try {
       await registerUser(formData);
       setMessage("Account created successfully!");
       setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
-      console.log("Error response:", err);
-      setError(err.response?.data?.error || "Something went wrong");
+      console.error("Error response:", err);
+      setError(err.response?.data || "Something went wrong");
     }
   };
 

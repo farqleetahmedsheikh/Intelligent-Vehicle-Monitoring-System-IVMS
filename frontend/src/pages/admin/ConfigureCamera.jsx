@@ -20,7 +20,6 @@ export default function ConfigureCamera() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Configure Submitted:", formData);
     alert("Configure submitted successfully!");
     // reset form
     setFormData({

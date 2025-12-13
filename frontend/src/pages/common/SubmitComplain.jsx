@@ -65,7 +65,6 @@ export default function SubmitComplaintPage() {
     }
 
     try {
-      console.log("Submitting complaint with data:", finalData);
       const response = await registerComplaint(finalData);
       if (response.data.email_status.includes("Failed")) {
         setMessage(

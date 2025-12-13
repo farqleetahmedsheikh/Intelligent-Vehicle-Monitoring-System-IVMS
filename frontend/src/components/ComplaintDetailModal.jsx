@@ -4,7 +4,6 @@ import "./styles/ComplaintDetailModal.css";
 
 export default function ComplaintDetailModal({ complaint, onClose }) {
   if (!complaint) return null;
-  console.log("Displaying complaint details:", complaint);
 
   return ReactDOM.createPortal(
     <div className="modal-backdrop" onClick={onClose}>

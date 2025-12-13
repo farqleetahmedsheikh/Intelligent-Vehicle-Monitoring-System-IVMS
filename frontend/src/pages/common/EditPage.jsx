@@ -34,8 +34,6 @@ export default function EditProfile() {
     fetchUser();
   }, [email]);
 
-  // Calculate initials (no need for useEffect)
-//   console.log("user full Name", user.fullName)
   const initials =
     user?.fullName
       ?.split(" ")

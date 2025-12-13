@@ -20,7 +20,6 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const fetchComplaints = async () => {
-      console.log("Fetching complaints for user:", user.email);
       try {
         setLoading(true);
         const response = await fetchAllComplaints();

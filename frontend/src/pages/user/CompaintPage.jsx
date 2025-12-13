@@ -27,7 +27,6 @@ export default function ComplaintsPage() {
           params: { email, page: currentPage, limit },
         });
         setComplaints(res.data.complaints || []);
-        console.log("Fetched complaints data:", res);
         const total = res.data.total || 0;
         setTotalPages(Math.ceil(total / limit));
       } catch (err) {
