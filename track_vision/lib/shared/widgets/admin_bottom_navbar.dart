@@ -4,7 +4,7 @@ import 'package:track_vision/shared/widgets/admin_appbar.dart';
 import 'package:track_vision/features/admin/camera/screens/admin_camera_screen.dart';
 import 'package:track_vision/features/admin/complaints/screens/admin_complaints_screen.dart';
 import 'package:track_vision/features/admin/dashboard/screens/admin_dashboard_screen.dart';
-import 'package:track_vision/features/user/complaints/screens/detailed_complaints_screen.dart';
+import 'package:track_vision/features/admin/complaints/screens/admin_complaints_list_screen.dart';
 import 'package:track_vision/features/auth/providers/admin_provider.dart';
 import 'package:track_vision/core/config/constants.dart';
 
@@ -19,11 +19,16 @@ class _AdminBottomNavbarState extends ConsumerState<AdminBottomNavbar> {
   final List<IconData> _icons = [
     Icons.home_outlined,
     Icons.feedback_outlined,
+    Icons.info_outlined,
     Icons.camera_alt_outlined,
-    Icons.description_outlined,
   ];
 
-  final List<String> _labels = ['Home', 'Complaints', 'Camera', 'Details'];
+  final List<String> _labels = [
+    'Home',
+    'Complaints',
+    'Manage Complaints',
+    'Camera',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +37,8 @@ class _AdminBottomNavbarState extends ConsumerState<AdminBottomNavbar> {
     final adminPages = [
       AdminDashboard(),
       AdminComplains(),
+      AdminComplaintsListScreen(),
       AdminCamera(),
-      DetailedComplaintsScreen(),
     ];
     return Scaffold(
       appBar: AdminAppbar(),

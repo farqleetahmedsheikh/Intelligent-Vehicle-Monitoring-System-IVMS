@@ -32,15 +32,28 @@ class _AdminAppbarState extends ConsumerState<AdminAppbar> {
       return '${tokens[0][0]}${tokens[1][0]}'.toUpperCase();
     }
 
-    return tokens[0][0].toUpperCase();
+    // If only one token (e.g., "admin"), take first two characters when possible
+    final first = tokens[0];
+    if (first.length >= 2) {
+      return first.substring(0, 2).toUpperCase();
+    }
+    // Fallback: duplicate single character
+    return (first[0] + first[0]).toUpperCase();
   }
 
   @override
   Widget build(BuildContext context) {
     final unreadCountAsync = ref.watch(unreadAlertsCountProvider);
     final authState = ref.read(authNotifierProvider);
-    final adminEmail = authState.user?.email ?? 'admin@system.com';
-    final initials = _getInitials(adminEmail);
+    final adminEmailCandidate = authState.user?.email ?? '';
+    final adminEmail = adminEmailCandidate.isNotEmpty
+        ? adminEmailCandidate
+        : 'admin@system.com';
+    final adminNameCandidate = authState.user?.full_Name?.trim() ?? '';
+    final sourceForInitials = adminNameCandidate.isNotEmpty
+        ? adminNameCandidate
+        : adminEmail;
+    final initials = _getInitials(sourceForInitials);
 
     return Container(
       height: widget.preferredSize.height,

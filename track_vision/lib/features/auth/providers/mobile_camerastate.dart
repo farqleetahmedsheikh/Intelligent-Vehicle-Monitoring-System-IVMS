@@ -21,8 +21,13 @@ class MobileCamerastate extends Notifier<ScanState> {
 
   @override
   ScanState build() {
-    _prefs = ref.watch(sharedPrefsProvider);
-    _loadFromPrefs();
+    try {
+      _prefs = ref.watch(sharedPrefsProvider);
+      _loadFromPrefs();
+    } catch (e) {
+      // SharedPreferences not initialized yet, will be set later
+      print('Warning: SharedPreferences not available during build: $e');
+    }
     return ScanState.initial();
   }
 
@@ -45,5 +50,5 @@ class MobileCamerastate extends Notifier<ScanState> {
 
 final mobileCamerastateProvider =
     NotifierProvider<MobileCamerastate, ScanState>(() {
-  return MobileCamerastate();
-});
+      return MobileCamerastate();
+    });

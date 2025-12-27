@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:track_vision/core/config/constants.dart';
 import 'package:track_vision/core/services/api_service.dart';
+import 'package:track_vision/shared/models/complaint_model.dart';
 import 'package:track_vision/shared/providers/providers.dart';
 import 'package:track_vision/features/user/complaints/widgets/complaint_card.dart';
 import 'package:track_vision/features/user/complaints/widgets/complaint_detail_modal.dart';
@@ -17,22 +18,49 @@ class SearchComplaintsScreen extends ConsumerStatefulWidget {
 class _SearchComplaintsScreenState
     extends ConsumerState<SearchComplaintsScreen> {
   final _searchController = TextEditingController();
+  final _scrollController = ScrollController();
+
   bool _isLoading = false;
-  List<dynamic> _searchResults = [];
+  bool _isLoadingMore = false;
+  List<Complaint> _searchResults = [];
   String? _error;
   String? _successMessage;
   bool _hasSearched = false;
 
+  // Pagination
+  int _currentPage = 1;
+  int _totalPages = 1;
+  int _limit = 10;
+  int _total = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.9) {
+      if (!_isLoadingMore && _currentPage < _totalPages) {
+        _loadMoreResults();
+      }
+    }
   }
 
   Future<void> _handleSearch() async {
     final query = _searchController.text.trim();
 
     if (query.isEmpty) {
+      if (!mounted) return;
+
       setState(() {
         _error = 'Please enter Plate Number, CNIC, or Chassis Number.';
         _successMessage = null;
@@ -40,11 +68,14 @@ class _SearchComplaintsScreenState
       return;
     }
 
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _error = null;
       _successMessage = null;
       _hasSearched = true;
+      _currentPage = 1;
     });
 
     try {
@@ -52,27 +83,39 @@ class _SearchComplaintsScreenState
       final userRole = authState.user?.role ?? 'user';
       final userEmail = authState.user?.email;
 
-      List<dynamic> results;
+      final response = await AuthServices.searchComplaintsPaginated(
+        query: query,
+        page: _currentPage,
+        limit: _limit,
+        role: userRole,
+        email: userRole != 'admin' ? userEmail : null,
+      );
 
-      if (userRole == 'admin') {
-        results = await AuthServices.searchComplaintForAdmin(query);
+      if (!mounted) return;
+
+      if (response['success']) {
+        setState(() {
+          _searchResults = response['complaints'] as List<Complaint>;
+          _total = response['total'];
+          _totalPages = response['totalPages'];
+          _currentPage = response['page'];
+          _isLoading = false;
+          if (_searchResults.isNotEmpty) {
+            _successMessage = 'Found $_total result(s).';
+          } else {
+            _error = 'No matching complaints found.';
+          }
+        });
       } else {
-        if (userEmail == null) {
-          throw Exception('User email not found');
-        }
-        results = await AuthServices.searchComplaintForUser(query, userEmail);
+        setState(() {
+          _error = response['message'] ?? 'Search failed';
+          _isLoading = false;
+          _searchResults = [];
+        });
       }
-
-      setState(() {
-        _searchResults = results;
-        _isLoading = false;
-        if (results.isNotEmpty) {
-          _successMessage = 'Found ${results.length} result(s).';
-        } else {
-          _error = 'No matching complaints found.';
-        }
-      });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
         _error = 'Search failed: $e';
         _isLoading = false;
@@ -81,10 +124,53 @@ class _SearchComplaintsScreenState
     }
   }
 
-  void _viewComplaintDetails(dynamic complaint) {
+  Future<void> _loadMoreResults() async {
+    if (_isLoadingMore || !mounted) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final query = _searchController.text.trim();
+      final authState = ref.read(authNotifierProvider);
+      final userRole = authState.user?.role ?? 'user';
+      final userEmail = authState.user?.email;
+
+      final response = await AuthServices.searchComplaintsPaginated(
+        query: query,
+        page: _currentPage + 1,
+        limit: _limit,
+        role: userRole,
+        email: userRole != 'admin' ? userEmail : null,
+      );
+
+      if (!mounted) return;
+
+      if (response['success']) {
+        setState(() {
+          _searchResults.addAll(response['complaints'] as List<Complaint>);
+          _currentPage = response['page'];
+          _isLoadingMore = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
+  }
+
+  void _viewComplaintDetails(Complaint complaint) {
     showDialog(
       context: context,
-      builder: (context) => ComplaintDetailModal(complaint: complaint),
+      builder: (context) => ComplaintDetailModal(complaint: complaint.toJson()),
     );
   }
 
@@ -259,12 +345,23 @@ class _SearchComplaintsScreenState
                             ),
                           )
                         : ListView.builder(
-                            itemCount: _searchResults.length,
+                            controller: _scrollController,
+                            itemCount:
+                                _searchResults.length +
+                                (_isLoadingMore ? 1 : 0),
                             itemBuilder: (context, index) {
+                              if (index == _searchResults.length) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
                               final complaint = _searchResults[index];
                               return ComplaintCard(
-                                complaint: complaint,
-                                onView: _viewComplaintDetails,
+                                complaint: complaint.toJson(),
+                                onView: (c) => _viewComplaintDetails(complaint),
                               );
                             },
                           )
@@ -273,18 +370,17 @@ class _SearchComplaintsScreenState
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.find_in_page_outlined,
+                            Icons.search,
                             size: 80,
                             color: Colors.grey.shade400,
                           ),
                           const SizedBox(height: 20),
                           Text(
-                            'Enter a search query to find complaints',
+                            'Enter a search term to begin',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 18,
                               color: Colors.grey.shade600,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),

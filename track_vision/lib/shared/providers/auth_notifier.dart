@@ -209,9 +209,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   // reset password
-  Future<void> resetPassword(String newPassword, String confirmPassword) async {
+  Future<void> resetPassword(String email, String newPassword) async {
     state = state.copyWith(status: AuthStatus.loading, message: null);
-    final res = await AuthServices.resetPassword(newPassword, confirmPassword);
+    final res = await AuthServices.resetPassword(email, newPassword);
     if (res['success'] == true) {
       state = state.copyWith(
         status: AuthStatus.unauthenticated,

@@ -1,17 +1,18 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:track_vision/App_Screens/Admin_screens/admin_alerts.dart';
-import 'package:track_vision/App_Screens/Admin_screens/admin_bottomnavbar.dart';
-import 'package:track_vision/App_Screens/Admin_screens/admin_dashboard.dart';
-import 'package:track_vision/App_Screens/Admin_screens/admin_vehicles.dart';
-import 'package:track_vision/App_Screens/forgot_password.dart';
-import 'package:track_vision/App_Screens/log_in.dart';
-import 'package:track_vision/App_Screens/new_password.dart';
-import 'package:track_vision/App_Screens/sign_up.dart';
-import 'package:track_vision/App_Screens/splash_screen.dart';
-import 'package:track_vision/App_Screens/verify_code.dart';
-import 'package:track_vision/Auth/user/mobile_camerastate.dart';
+import 'package:track_vision/features/admin/alerts/screens/admin_alerts_screen.dart';
+import 'package:track_vision/shared/widgets/admin_bottom_navbar.dart';
+import 'package:track_vision/features/admin/dashboard/screens/admin_dashboard_screen.dart';
+import 'package:track_vision/features/admin/vehicles/screens/admin_vehicles_screen.dart';
+import 'package:track_vision/features/auth/screens/forgot_password_screen.dart';
+import 'package:track_vision/features/auth/screens/login_screen.dart';
+import 'package:track_vision/features/auth/screens/reset_password_screen.dart';
+import 'package:track_vision/features/auth/screens/signup_screen.dart';
+import 'package:track_vision/features/auth/screens/splash_screen.dart';
+import 'package:track_vision/features/auth/screens/verify_code_screen.dart';
+import 'package:track_vision/features/auth/providers/mobile_camerastate.dart';
+import 'package:track_vision/shared/widgets/not_found_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,31 +43,35 @@ class _MyAppState extends ConsumerState<MyApp> {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      home: const SignUp(),
+      home: const SplashScreen(),
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/login/':
-            return MaterialPageRoute(builder: (_) => LogIn());
+            return MaterialPageRoute(builder: (_) => const LogIn());
           case '/signup/':
-            return MaterialPageRoute(builder: (_) => SignUp());
+          case '/signup':
+            return MaterialPageRoute(builder: (_) => const SignUp());
           case '/forgot-password/':
-            return MaterialPageRoute(builder: (_) => ForgotPassword());
+            return MaterialPageRoute(builder: (_) => const ForgotPassword());
           case '/verify-code/':
             final email = settings.arguments as String;
             return MaterialPageRoute(builder: (_) => VerifyCode(email: email));
           case '/new-password/':
-            return MaterialPageRoute(builder: (_) => NewPassword());
+            return MaterialPageRoute(builder: (_) => const NewPassword());
           // Admin page routed
           case '/admin-dashboard/':
-            return MaterialPageRoute(builder: (_) => AdminDashboard());
+            return MaterialPageRoute(builder: (_) => const AdminDashboard());
           case '/admin-vehicles/':
-            return MaterialPageRoute(builder: (_) => AdminVehicles());
+            return MaterialPageRoute(builder: (_) => const AdminVehicles());
           case '/admin_alerts/':
-            return MaterialPageRoute(builder: (_) => AdminAlerts());
+            return MaterialPageRoute(builder: (_) => const AdminAlerts());
           case '/admin-bottomNavbar/':
-            return MaterialPageRoute(builder: (_) => AdminBottomNavbar());
+            return MaterialPageRoute(builder: (_) => const AdminBottomNavbar());
           default:
-            return null;
+            // Return 404 page for unknown routes
+            return MaterialPageRoute(
+              builder: (_) => NotFoundPage(routeName: settings.name),
+            );
         }
       },
     );

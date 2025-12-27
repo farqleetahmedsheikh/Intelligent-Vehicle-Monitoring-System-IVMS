@@ -20,11 +20,11 @@ class _UserBottomNavbarState extends ConsumerState<UserBottomNavbar> {
   final List<IconData> _icons = [
     Icons.home_outlined,
     Icons.feedback_outlined,
+    Icons.info_outlined,
     Icons.camera_alt_outlined,
-    Icons.description_outlined,
   ];
 
-  final List<String> _labels = ['Home', 'Complaints', 'Camera', 'Details'];
+  final List<String> _labels = ['Home', 'Complaints', 'My Complains', 'Camera'];
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +33,8 @@ class _UserBottomNavbarState extends ConsumerState<UserBottomNavbar> {
     final userPages = [
       UserDashboard(),
       UserComplains(),
-      UserCamera(),
       DetailedComplaintsScreen(),
+      UserCamera(),
     ];
 
     return Scaffold(

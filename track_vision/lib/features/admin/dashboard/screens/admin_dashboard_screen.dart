@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:track_vision/features/admin/dashboard/widgets/detection_section.dart';
-import 'package:track_vision/features/admin/dashboard/widgets/google_map.dart';
+import 'package:track_vision/features/admin/dashboard/widgets/vehicle_detection_table.dart';
+import 'package:track_vision/features/admin/dashboard/widgets/vehicle_map_preview.dart';
 import 'package:track_vision/features/admin/dashboard/widgets/overview_cards.dart';
 
 class AdminDashboard extends StatefulWidget {
@@ -36,12 +36,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
               // Overview Card
               OverviewCards(),
               const SizedBox(height: 20),
-              //Latest Detections
-              DetectionSection(),
-              const SizedBox(height: 20),
-              // Map Preview
+
+              //Latest Detections Table
               Text(
-                "Map Preview",
+                "Latest Vehicle Detections",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -49,7 +47,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ),
               ),
               SizedBox(height: 10),
-              GoogleMap(),
+              VehicleDetectionTable(limit: 10),
+              const SizedBox(height: 20),
+
+              // Map Preview with vehicle locations
+              Text(
+                "Detection Locations Map",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 10),
+              VehicleMapPreview(height: 400, limit: 20),
             ],
           ),
         ),

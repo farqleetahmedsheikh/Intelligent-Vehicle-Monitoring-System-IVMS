@@ -8,6 +8,7 @@ import 'package:track_vision/shared/models/route_model.dart';
 
 // API Services
 class AuthServices {
+  // Use machine IP for Windows Desktop
   static const String baseUrl = "http://10.0.2.2:8000";
   static String? _token;
 
@@ -44,17 +45,23 @@ class AuthServices {
   }
 
   static Future<Map<String, dynamic>> _post(String endpoint, Map body) async {
-    final url = Uri.parse('$baseUrl$endpoint');
-    final headers = {
-      'Content-Type': 'application/json',
-      if (_token != null) 'Authorization': 'Bearer $_token',
-    };
-    final res = await http.post(url, headers: headers, body: jsonEncode(body));
-
-    print('REQUEST to $endpoint: $body');
-    print('RESPONSE ${res.statusCode}: ${res.body}');
-
     try {
+      final url = Uri.parse('$baseUrl$endpoint');
+      final headers = {
+        'Content-Type': 'application/json',
+        if (_token != null) 'Authorization': 'Bearer $_token',
+      };
+
+      print('REQUEST to $baseUrl$endpoint: $body');
+
+      final res = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      print('RESPONSE ${res.statusCode}: ${res.body}');
+
       final decoded = jsonDecode(res.body);
       if (res.statusCode >= 200 && res.statusCode < 300) {
         return {'success': true, 'data': decoded};
@@ -65,7 +72,8 @@ class AuthServices {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Parse error: $e'};
+      print('HTTP POST Error: $e');
+      return {'success': false, 'message': 'Connection error: $e'};
     }
   }
 
@@ -207,6 +215,77 @@ class AuthServices {
   // Mark alert as read
   static Future<Map<String, dynamic>> markAlertAsRead(int alertId) async {
     return _post('/alerts/$alertId/mark-read/', {});
+  }
+
+  // ============= PAGINATED COMPLAINT ENDPOINTS =============
+
+  // Get complaints with pagination
+  static Future<Map<String, dynamic>> getComplaintsPaginated({
+    int page = 1,
+    int limit = 10,
+    String? email,
+  }) async {
+    String endpoint = '/complaints/?page=$page&limit=$limit';
+    if (email != null && email.isNotEmpty) {
+      endpoint += '&email=$email';
+    }
+
+    final result = await _get(endpoint);
+    if (result['success']) {
+      final data = result['data'];
+      return {
+        'success': true,
+        'total': data['total'] ?? 0,
+        'page': data['page'] ?? page,
+        'limit': data['limit'] ?? limit,
+        'totalPages': data['totalPages'] ?? 1,
+        'complaints': (data['complaints'] as List)
+            .map((item) => Complaint.fromJson(item))
+            .toList(),
+      };
+    }
+    return {
+      'success': false,
+      'message': result['message'] ?? 'Failed to fetch complaints',
+      'complaints': <Complaint>[],
+    };
+  }
+
+  // Search complaints with pagination
+  static Future<Map<String, dynamic>> searchComplaintsPaginated({
+    required String query,
+    int page = 1,
+    int limit = 10,
+    String? role,
+    String? email,
+  }) async {
+    String endpoint = '/complaints/search/?q=$query&page=$page&limit=$limit';
+    if (role != null) {
+      endpoint += '&role=$role';
+    }
+    if (email != null) {
+      endpoint += '&email=$email';
+    }
+
+    final result = await _get(endpoint);
+    if (result['success']) {
+      final data = result['data'];
+      return {
+        'success': true,
+        'total': data['total'] ?? 0,
+        'page': data['page'] ?? page,
+        'limit': data['limit'] ?? limit,
+        'totalPages': data['totalPages'] ?? 1,
+        'complaints': (data['complaints'] as List)
+            .map((item) => Complaint.fromJson(item))
+            .toList(),
+      };
+    }
+    return {
+      'success': false,
+      'message': result['message'] ?? 'Failed to search complaints',
+      'complaints': <Complaint>[],
+    };
   }
 
   // Create complaint
