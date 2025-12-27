@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:track_vision/features/auth/providers/admin_provider.dart';
 import 'package:track_vision/features/user/alerts/widgets/showalerts.dart';
 import 'package:track_vision/features/user/profile/widgets/profile_edit.dart';
 import 'package:track_vision/shared/providers/auth_notifier.dart';
@@ -50,6 +51,9 @@ class _AdminAppbarState extends ConsumerState<AdminAppbar> {
         ? adminEmailCandidate
         : 'admin@system.com';
     final adminNameCandidate = authState.user?.full_Name?.trim() ?? '';
+    final displayName = adminNameCandidate.isNotEmpty
+        ? adminNameCandidate
+        : 'Admin';
     final sourceForInitials = adminNameCandidate.isNotEmpty
         ? adminNameCandidate
         : adminEmail;
@@ -149,7 +153,7 @@ class _AdminAppbarState extends ConsumerState<AdminAppbar> {
                 const SizedBox(width: 1),
                 // Profile Avatar Button with Custom Popup
                 GestureDetector(
-                  onTap: () => _showProfileMenu(context, adminEmail, initials),
+                  onTap: () => _showProfileMenu(context, displayName, initials),
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: CircleAvatar(
@@ -176,10 +180,11 @@ class _AdminAppbarState extends ConsumerState<AdminAppbar> {
 
   void _showProfileMenu(
     BuildContext context,
-    String adminEmail,
+    String displayName,
     String initials,
   ) {
     final authState = ref.read(authNotifierProvider);
+    final adminEmail = authState.user?.email ?? 'admin@system.com';
     final userRole = authState.user?.role ?? 'Admin';
 
     showDialog(
@@ -224,9 +229,9 @@ class _AdminAppbarState extends ConsumerState<AdminAppbar> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Admin',
-                                style: TextStyle(
+                              Text(
+                                displayName,
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black87,
