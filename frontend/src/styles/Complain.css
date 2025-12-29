@@ -9,10 +9,9 @@
 
 .complaint-main-container p {
     margin-bottom: 30px;
-    color: #555;
+    color: var(--text);
 }
 
-/* Cards for options */
 .complaint-options {
     display: flex;
     justify-content: center;
@@ -58,7 +57,6 @@ textarea {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* Tabs (if you use tabs later) */
 .complaint-tabs {
     display: flex;
     gap: 20px;
@@ -110,36 +108,6 @@ textarea {
     background: darken(var(--primary-color), 10%);
 }
 
-/* Search Page */
-.search-bar {
-    width: 100%;
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Search Results */
-.search-results {
-    max-height: 500px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.search-result-item {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
-}
-
-.search-result-item p {
-    margin: 3px 0;
-}
-
 .back-button {
     display: inline-flex;
     align-items: center;
@@ -175,4 +143,22 @@ textarea {
     color: #006600;
     margin-bottom: 12px;
     border-radius: 4px;
+}
+
+body[data-theme='dark'] .complaint-card, .complaint-main-container {
+  background-color: var(--card-bg);
+  box-shadow: 0 8px 24px var(--card-shadow);
+  backdrop-filter: blur(12px);
+}
+
+body[data-theme='dark'] .complaint-card h3, .complaint-card p {
+  color: var(--text);
+}
+
+body[data-theme='dark'] .complaint-card p {
+  color: var(--text-primary);
+}
+
+body[data-theme='dark'] .complaint-subtitle {
+  color: var(--text-primary);
 }

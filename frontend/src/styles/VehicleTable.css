@@ -1,0 +1,97 @@
+.vehicle-table {
+  background-color: var(--card-bg);
+  color: var(--text);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px var(--card-shadow);
+  backdrop-filter: blur(12px);
+  transition: all 0.5s ease;
+  margin-bottom: 20px;
+}
+
+.vehicle-table h2 {
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.vehicle-table table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.vehicle-table th,
+.vehicle-table td {
+  padding: 12px 15px;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.vehicle-table th {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.vehicle-table tr {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.vehicle-table tr:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Vehicle status colors */
+.status.investigating {
+  background: #ff3b30;
+  color: #fff;
+}
+
+.status.resolved {
+  background: #0c884a;
+  color: #fff;
+}
+
+.status.closed {
+  background: #ff9f10;
+  color: #fff;
+}
+
+.vehicle-table td.status {
+  font-weight: 700;
+  text-transform: capitalize;
+  padding: 8px 14px;
+  border-radius: 8px;
+  display: inline-block;
+  transition: all 0.3s ease, color 0.3s ease;
+  color: white;
+  font-size: 12px;
+}
+
+.vehicle-table td.status.active {
+  background-color: var(--primary-blue);
+  color: #fff;
+}
+
+body[data-theme='dark'] .vehicle-table {
+  background-color: var(--card-bg);
+  box-shadow: 0 8px 24px var(--card-shadow);
+  backdrop-filter: blur(12px);
+}
+
+body[data-theme='dark'] .vehicle-table th {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+body[data-theme='dark'] .vehicle-table tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body[data-theme='dark'] .vehicle-table tr:hover {
+  background-color: rgba(59, 130, 246, 0.15);
+}

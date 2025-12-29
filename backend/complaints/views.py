@@ -4,10 +4,11 @@ from rest_framework import status
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Complaint
 from .serializers import ComplaintSerializer
 import logging
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -59,24 +60,35 @@ def register_complaint(request):
 def search_complaint(request):
     query = request.query_params.get('q', '').strip()
     role = request.query_params.get('role')
-    if(role == "user"):
-        email = request.query_params.get('email')
+    email = request.query_params.get('email')
+
+    page = request.query_params.get('page', 1)
+    limit = request.query_params.get('limit', 10)
+
     if not query:
         return Response({"error": "Search query 'q' is required"}, status=400)
 
+    try:
+        page = int(page)
+        limit = int(limit)
+    except ValueError:
+        return Response({"error": "Invalid page or limit"}, status=400)
+
+    page = max(page, 1)
+    limit = min(max(limit, 1), 50)
+
     complaints = Complaint.objects.none()
-    
-    # Detect what user entered
-    is_cnic = query.replace('-', '').isdigit() and len(query.replace('-', '')) in [13, 14]
+
+    # Detect query type
+    clean_query = query.replace('-', '')
+    is_cnic = clean_query.isdigit() and len(clean_query) in [13, 14]
     is_plate = any(c.isalpha() for c in query) and any(c.isdigit() for c in query)
     is_chassis = len(query) > 10 and query.isalnum()
-    print("Search query:", query, "is_cnic:", is_cnic, "is_plate:", is_plate, "is_chassis:", is_chassis)
+
     if is_cnic:
         complaints = Complaint.objects.filter(ownerCnic=query)
     elif is_plate:
-        print("Searching complaints by plate number:", query)
         complaints = Complaint.objects.filter(plateNumber__iexact=query)
-        print("Complaints found for plate number", query, ":", complaints)
     elif is_chassis:
         complaints = Complaint.objects.filter(chassisNumber__iexact=query)
     else:
@@ -89,27 +101,74 @@ def search_complaint(request):
         )
 
     # Restrict normal users
-    
-    if role != 'admin':
-        print("Searching complaints for user:", "with query:", query)
+    if role != "admin":
         complaints = complaints.filter(ownerEmail=email)
 
-    serializer = ComplaintSerializer(complaints, many=True)
-    return Response({"data": serializer.data, "status": 200})
+    complaints = complaints.order_by('-createdAt')
+
+    paginator = Paginator(complaints, limit)
+
+    try:
+        complaints_page = paginator.page(page)
+    except PageNotAnInteger:
+        complaints_page = paginator.page(1)
+    except EmptyPage:
+        complaints_page = paginator.page(paginator.num_pages)
+
+    serializer = ComplaintSerializer(complaints_page.object_list, many=True)
+
+    return Response({
+        "total": paginator.count,
+        "page": page,
+        "limit": limit,
+        "totalPages": paginator.num_pages,
+        "complaints": serializer.data
+    })
 
 @api_view(['GET'])
 def complaint_list(request):
     userEmail = request.GET.get('email')
+    page = request.GET.get('page', 1)
+    limit = request.GET.get('limit', 10)
 
+    try:
+        page = int(page)
+        limit = int(limit)
+    except ValueError:
+        return Response({"error": "Invalid page or limit"}, status=400)
+
+    # Safety limits
+    page = max(page, 1)
+    limit = min(max(limit, 1), 50)
+
+    # Filter complaints
     if userEmail:
-        complaints = Complaint.objects.filter(ownerEmail=userEmail).order_by('-createdAt')
+        complaints_queryset = Complaint.objects.filter(
+            ownerEmail=userEmail
+        ).order_by('-createdAt')
     else:
-        complaints = Complaint.objects.all().order_by('-createdAt')
+        # ⚠️ Ideally check admin role here
+        complaints_queryset = Complaint.objects.all().order_by('-createdAt')
 
-    serializer = ComplaintSerializer(complaints, many=True)
-    print("Complaints fetched for", userEmail, ":", serializer.data)
-    return Response({"complaints": serializer.data})
+    paginator = Paginator(complaints_queryset, limit)
 
+    try:
+        complaints_page = paginator.page(page)
+    except PageNotAnInteger:
+        complaints_page = paginator.page(1)
+    except EmptyPage:
+        complaints_page = paginator.page(paginator.num_pages)
+
+    serializer = ComplaintSerializer(complaints_page.object_list, many=True)
+
+    return Response({
+        "total": paginator.count,
+        "page": page,
+        "limit": limit,
+        "totalPages": paginator.num_pages,
+        "complaints": serializer.data
+    })
+ 
 @api_view(['GET'])
 def get_complaint(request, complaint_id):
     try:
@@ -119,3 +178,21 @@ def get_complaint(request, complaint_id):
 
     serializer = ComplaintSerializer(complaint)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_all_complaints(request):
+    complaints = Complaint.objects.all().order_by("-id")
+    serializer = ComplaintSerializer(complaints, many=True)
+    return Response(serializer.data)
+
+@api_view(["PATCH"])
+def update_complaint_status(request, id):
+    try:
+        complaint = Complaint.objects.get(id=id)
+    except Complaint.DoesNotExist:
+        return Response({"error": "Not found"}, status=404)
+
+    status_value = request.data.get("status")
+    complaint.status = status_value
+    complaint.save()
+    return Response({"success": True})

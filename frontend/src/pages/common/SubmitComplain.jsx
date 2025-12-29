@@ -6,6 +6,7 @@ import Button from "../../components/Button";
 import { registerComplaint } from "../../../api/complaintApi";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Loader from "../../components/Loader";
 
 export default function SubmitComplaintPage() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function SubmitComplaintPage() {
     : null;
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     ownerName: "",
     ownerEmail: "",
@@ -47,7 +49,7 @@ export default function SubmitComplaintPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     // Auto fill user data if user is normal user
     let finalData = { ...formData };
     if (user && user.role === "user") {
@@ -63,7 +65,6 @@ export default function SubmitComplaintPage() {
     }
 
     try {
-      console.log("Submitting complaint with data:", finalData);
       const response = await registerComplaint(finalData);
       if (response.data.email_status.includes("Failed")) {
         setMessage(
@@ -89,9 +90,11 @@ export default function SubmitComplaintPage() {
     } catch (error) {
       setError("Something went wrong! Try again");
       console.error("Error submitting complaint:", error);
+    } finally {
+      setLoading(false);
     }
   };
-
+  if (loading) return <Loader />;
   return (
     <div className="complaint-container">
       <button className="back-button" onClick={goBack}>
@@ -110,6 +113,7 @@ export default function SubmitComplaintPage() {
                 name="ownerEmail"
                 type="email"
                 value={formData.ownerEmail}
+                placeholder={"Ex. example@example.com"}
                 onChange={handleChange}
                 style={{ width: "90%" }}
               />
@@ -119,6 +123,7 @@ export default function SubmitComplaintPage() {
                 name="ownerPhone"
                 type="text"
                 value={formData.ownerPhone}
+                placeholder={"Ex. 0332332332"}
                 onChange={handleChange}
                 style={{ width: "90%" }}
               />
@@ -129,6 +134,7 @@ export default function SubmitComplaintPage() {
               name="ownerCnic"
               type="text"
               value={formData.ownerCnic}
+              placeholder={"Ex. 32123-1233231-2"}
               onChange={handleChange}
               style={{ width: "90%" }}
             />
@@ -142,6 +148,7 @@ export default function SubmitComplaintPage() {
             label="Make"
             name="vehicleMake"
             value={formData.vehicleMake}
+            placeholder={"Ex. Honda"}
             onChange={handleChange}
             style={{ width: "90%" }}
           />
@@ -150,6 +157,7 @@ export default function SubmitComplaintPage() {
             label="Model"
             name="vehicleModel"
             value={formData.vehicleModel}
+            placeholder={"Ex. 2025"}
             onChange={handleChange}
             style={{ width: "90%" }}
           />
@@ -160,6 +168,7 @@ export default function SubmitComplaintPage() {
             label="Variant"
             name="vehicleVariant"
             value={formData.vehicleVariant}
+            placeholder={"Ex. VXL"}
             onChange={handleChange}
             style={{ width: "90%" }}
           />
@@ -169,6 +178,7 @@ export default function SubmitComplaintPage() {
             name="vehicleColor"
             value={formData.vehicleColor}
             onChange={handleChange}
+            placeholder={"Ex. Black"}
             style={{ width: "90%" }}
           />
         </div>
@@ -178,6 +188,7 @@ export default function SubmitComplaintPage() {
             label="Plate Number"
             name="plateNumber"
             value={formData.plateNumber}
+            placeholder={"Ex. AAA-123"}
             onChange={handleChange}
             style={{ width: "90%" }}
           />
@@ -186,6 +197,7 @@ export default function SubmitComplaintPage() {
             label="Chassis Number"
             name="chassisNumber"
             value={formData.chassisNumber}
+            placeholder={"Ex. 4562ASA5621"}
             onChange={handleChange}
             style={{ width: "90%" }}
           />
@@ -196,6 +208,7 @@ export default function SubmitComplaintPage() {
           name="complaintDescription"
           rows="4"
           value={formData.complaintDescription}
+          placeholder={"Ex. White Honda Civic got stolen on 12th May from main murree road..."}
           onChange={handleChange}
         />
 

@@ -27,6 +27,7 @@ export default function VehicleDetailsPage() {
         setComplaint(response.data);
       } catch (err) {
         setError("Failed to fetch vehicle details.");
+        console.error("Error fetching vehicle details:", err);
       } finally {
         setLoading(false);
       }
@@ -38,7 +39,6 @@ export default function VehicleDetailsPage() {
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
   if (!complaint) return <p>No vehicle found.</p>;
-  console.log("Vehicle Complaint", complaint);
 
   return (
     <div className="vehicle-details-container">
@@ -79,7 +79,7 @@ export default function VehicleDetailsPage() {
           {complaint.vehiclePicture && (
             <div className="vehicle-image-box">
               <img
-                src={`http://localhost:8000/${complaint.vehiclePicture}`}
+                src={`http://localhost:8000${complaint.vehiclePicture}`}
                 alt="Vehicle"
                 className="vehicle-image"
               />

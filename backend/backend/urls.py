@@ -9,7 +9,7 @@ from pathlib import Path
 VEHICLE_PICTURES_ROOT = Path(__file__).resolve().parent.parent / "vehicle_pictures"
 
 # Import complaint views
-from complaints.views import register_complaint, search_complaint, complaint_list, get_complaint
+from complaints.views import register_complaint, search_complaint, complaint_list, get_complaint, update_complaint_status, get_all_complaints
 from alerts.views import get_user_alerts, get_alert_details, mark_alert_read
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,7 +28,10 @@ urlpatterns = [
     path('complaints/', complaint_list, name="complaint-list"),
     path('complaints/register/', register_complaint, name="register-complaint"),
     path('complaints/search/', search_complaint, name="search-complaint"),
+    path('complaints/all/', get_all_complaints, name="get_all_complaints"),
     path('complaints/<int:complaint_id>/', get_complaint, name='get-complaint'),
+    path("complaints/update-status/<int:id>/", update_complaint_status, name='update_complaint_status'),
+
 
     # Alert APIs
     path("alerts/user/", get_user_alerts, name="get-user-alerts"),

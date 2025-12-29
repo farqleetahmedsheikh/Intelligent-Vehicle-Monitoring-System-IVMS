@@ -39,9 +39,13 @@ python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 cd backend
 pip install -r requirements.txt
-python manage.py makemigrations
+python manage.py makemigrations users
+python manage.py makemigrations complaints
+python manage.py makemigrations detection
+python manage.py makemigrations routes
+python manage.py makemigrations alerts
 python manage.py migrate
-python manage.py runserver
+daphne -p 8000 backend.asgi:application
 ```
 Access API at 👉 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
@@ -113,7 +117,7 @@ const String BASE_URL = "http://127.0.0.1:8000";
 
 | Component | Command | Description |
 |------------|----------|-------------|
-| Backend | `python manage.py runserver` | API & database |
+| Backend | `daphne -p 8000 backend.asgi:application` | API & database |
 | AI Module | `python recognize_plate.py` | Detects plates |
 | React | `npm run dev` | Web dashboard |
 | Flutter | `flutter run` | Mobile app |

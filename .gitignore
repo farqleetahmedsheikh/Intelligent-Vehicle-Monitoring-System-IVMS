@@ -8,19 +8,32 @@ __pycache__/
 
 # Virtual environments
 venv/
+.venv/
 env/
 *.env
 
 # Django stuff
 *.log
 *.pot
-*.pyc
 *.sqlite3
 *.db
+
+# ==============================
+# Flutter / Dart
+# ==============================
+
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/pubspec.lock
+*.coverage
+
+# Misc
 *.DS_Store
 *.egg-info
 *.egg
-*.coverage
 
 # Migrations (optional: track if you want)
 **/migrations/

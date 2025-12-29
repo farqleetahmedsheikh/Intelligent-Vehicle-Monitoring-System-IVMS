@@ -1,7 +1,7 @@
 /** @format */
 import "./styles/Sidebar.css";
 import { NavLink } from "react-router-dom";
-import { Home, Camera, MessageSquareWarning } from "lucide-react";
+import { Home, Camera, MessageSquareWarning, BadgeAlert } from "lucide-react";
 
 const Sidebar = () => {
   const role = localStorage.getItem("user")
@@ -32,16 +32,16 @@ const Sidebar = () => {
           </NavLink>
         </li>
 
-        {/* <li>
+        <li>
           <NavLink
-            to={`${baseUrl}/vehicles`}
+            to={`/${role}/dashboard/my-complaints`}
             className={({ isActive }) =>
               isActive ? "sidebar-link active" : "sidebar-link"
             }
           >
-            <Car size={18} /> Vehicles
+            <BadgeAlert size={18} /> {role === "admin" ? "Manage Complaints" : "My Complaints"}
           </NavLink>
-        </li> */}
+        </li>
 
         <li>
           <NavLink

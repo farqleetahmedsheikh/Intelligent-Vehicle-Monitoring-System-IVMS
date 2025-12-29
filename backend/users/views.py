@@ -21,10 +21,6 @@ import logging
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
-
-# -----------------------------------------------------------
-# REGISTER USER
-# -----------------------------------------------------------
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
@@ -65,10 +61,6 @@ class RegisterView(generics.CreateAPIView):
             }
         }, status=status.HTTP_201_CREATED)
 
-
-# -----------------------------------------------------------
-# LOGIN USER
-# -----------------------------------------------------------
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get("email")
@@ -114,11 +106,6 @@ class LoginView(APIView):
             {"status": "error", "message": "Invalid email or password"},
             status=status.HTTP_401_UNAUTHORIZED
         )
-
-
-# -----------------------------------------------------------
-# FORGOT PASSWORD (SEND OTP)
-# -----------------------------------------------------------
 class ForgotPasswordView(APIView):
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
@@ -129,7 +116,6 @@ class ForgotPasswordView(APIView):
         otp = str(random.randint(100000, 999999))
 
         PasswordResetOTP.objects.create(user=user, otp=otp)
-        print(otp)  # Debug Only
 
         try:
             html_content = render_to_string("email/forgot_password_otp.html", {
@@ -151,11 +137,6 @@ class ForgotPasswordView(APIView):
             logger.error(f"Failed to send OTP email: {e}")
 
         return Response({"message": "OTP sent to your email.", "otp": otp})
-
-
-# -----------------------------------------------------------
-# VERIFY OTP
-# -----------------------------------------------------------
 class VerifyOTPView(APIView):
     def post(self, request):
         serializer = VerifyOTPSerializer(data=request.data)
@@ -177,11 +158,6 @@ class VerifyOTPView(APIView):
         otp_record.save()
 
         return Response({"message": "OTP verified successfully."})
-
-
-# -----------------------------------------------------------
-# RESET PASSWORD
-# -----------------------------------------------------------
 class ResetPasswordView(APIView):
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
@@ -206,10 +182,6 @@ class ResetPasswordView(APIView):
 
         return Response({"message": "Password reset successful."})
 
-
-# -----------------------------------------------------------
-# GET PROFILE (by email)
-# -----------------------------------------------------------
 from rest_framework.decorators import api_view
 
 @api_view(["GET"])
@@ -231,10 +203,6 @@ def get_profile(request):
     }
     return Response(data)
 
-
-# -----------------------------------------------------------
-# UPDATE PROFILE (name + phone only)
-# -----------------------------------------------------------
 @api_view(["PUT"])
 def update_profile(request):
     email = request.data.get("email")

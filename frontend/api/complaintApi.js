@@ -12,24 +12,22 @@ export const registerComplaint = async (data) => {
   });
 };
 
-export const searchComplaintForUser = async (query, role, email) => {
+export const searchComplaintForUser = async (query) => {
   return axios.get(`${API_BASE}complaints/search/`, {
-    params: { q: query, role, email },
+    params: { ...query },
   });
 };
 
-export const searchComplaintForAdmin = async (query, role) => {
+export const searchComplaintForAdmin = async (query) => {
   return axios.get(`${API_BASE}complaints/search/`, {
-    params: { q: query, role },
+    params: { ...query },
   });
 };
 
 export const fetchUserComplaints = (userEmail) => {
-  console.log("Fetching complaints for:", userEmail);
   return axios.get(`${API_BASE}complaints`, {
     params: { email: userEmail },
   });
-
 };
 
 export const fetchAllComplaints = () => {

@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-_l7s7f@0zdio_mb)t74b%r#aw6%sg1s%+vjt86w81%q=#68doo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost', '10.99.177.55']
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # Third-party
     'rest_framework',
     'corsheaders',
+    "channels",
 
     # Local apps
     'complaints',
@@ -53,6 +54,14 @@ INSTALLED_APPS = [
     "alerts",
 ]
 
+ASGI_APPLICATION = "backend.asgi.application"
+
+# Redis backend for channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -94,12 +103,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'visiontrack_db',
         'USER': 'root',
-        'PASSWORD': '',  # leave empty if no password
+        'PASSWORD': 'root',  # leave empty if no password
         'HOST': '127.0.0.1',
         'PORT': '3306',
-         'OPTIONS': {
-            'unix_socket': '/opt/local/var/run/mariadb-10.11/mysqld.sock',
-        },
+        #  'OPTIONS': {
+        #     'unix_socket': '/opt/local/var/run/mariadb-10.11/mysqld.sock',
+        # },
     }
 }
 
@@ -181,5 +190,5 @@ EMAIL_HOST_PASSWORD = 'effl pesz xmht dzrk'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR.parent / 'backend/vehicle_pictures',  # <-- your images folder
+    BASE_DIR/'/vehicle_pictures',  # <-- your images folder
 ]

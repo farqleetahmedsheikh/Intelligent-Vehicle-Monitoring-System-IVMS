@@ -22,8 +22,7 @@ export default function Login() {
     setMessage("");
     setError("");
     try {
-      const res = await requestPasswordReset(formData);
-      console.log("Request Password Reset response:", res);
+      await requestPasswordReset(formData);
       localStorage.setItem("email", formData.email);
       setMessage("OTP sent to your email.");
       setTimeout(() => navigate("/verify-otp"), 1500);
@@ -45,7 +44,7 @@ export default function Login() {
           value={formData.email}
           onChange={handleChange}
         />
-        <Button type="submit" label="Forgot" />
+        <Button type="submit" label="Forgot" style={{ color: "#fff" }} />
         <AuthLinks
           leftText="Already have an account?"
           leftTo="/login"

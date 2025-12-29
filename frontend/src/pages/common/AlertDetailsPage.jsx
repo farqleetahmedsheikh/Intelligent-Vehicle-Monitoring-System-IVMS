@@ -1,12 +1,13 @@
 /** @format */
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/AlertDetails.css";
 import Loader from "../../components/Loader";
 import Button from "../../components/Button";
 import { getAlertDetails, markAlertRead } from "../../../api/alertApi";
 
 export default function AlertDetailsPage() {
+  const navigate = useNavigate();
   const { alertId } = useParams();
   const [alert, setAlert] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,6 +29,14 @@ export default function AlertDetailsPage() {
     }
   };
 
+  const goBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/"); // fallback route if no history
+    }
+  };
+
   const handleMarkAsRead = async () => {
     try {
       await markAlertRead(alertId);
@@ -45,6 +54,9 @@ export default function AlertDetailsPage() {
 
   return (
     <div className="alert-details-container">
+      <button className="back-button" onClick={goBack}>
+        <ArrowLeft size={18} /> Back
+      </button>
       <h2>Alert Details</h2>
 
       <div className="alert-card">
