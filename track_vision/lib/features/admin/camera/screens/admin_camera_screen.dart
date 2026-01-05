@@ -143,7 +143,15 @@ class _AdminCameraState extends ConsumerState<AdminCamera> {
                       ),
                     ),
                     Text(
-                      "Upload vehicle image for detection analysis",
+                      "Upload vehicle image for detection",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    Text(
+                      "analysis",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

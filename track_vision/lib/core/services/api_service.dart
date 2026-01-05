@@ -1,79 +1,164 @@
 ﻿import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:track_vision/core/config/api_config.dart';
 import 'package:track_vision/shared/models/complaint_model.dart';
 import 'package:track_vision/shared/models/detection_model.dart';
 import 'package:track_vision/shared/models/alert_model.dart';
 import 'package:track_vision/shared/models/route_model.dart';
 
-// API Services
+// API Services with Automatic Fallback Detection
 class AuthServices {
-  // Use machine IP for Windows Desktop
-  static const String baseUrl = "http://10.0.2.2:8000";
+  // Automatic IP detection with fallbacks
+  static String baseUrl = ApiConfig.baseUrl;
   static String? _token;
+  static String? _userEmail;
+  static bool _connectionTested = false;
 
   // Set token after login
   static void setToken(String token) {
     _token = token;
   }
 
-  // Get request with auth header
-  static Future<Map<String, dynamic>> _get(String endpoint) async {
-    final url = Uri.parse('$baseUrl$endpoint');
-    final headers = {
-      'Content-Type': 'application/json',
-      if (_token != null) 'Authorization': 'Bearer $_token',
-    };
-
-    final res = await http.get(url, headers: headers);
-    print('GET REQUEST to $endpoint');
-    print('RESPONSE ${res.statusCode}: ${res.body}');
-
-    try {
-      final decoded = jsonDecode(res.body);
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        return {'success': true, 'data': decoded};
-      } else {
-        return {
-          'success': false,
-          'message': decoded['message'] ?? decoded.toString(),
-        };
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Parse error: $e'};
-    }
+  // Set user email (call this during login)
+  static void setUserEmail(String email) {
+    _userEmail = email;
   }
 
-  static Future<Map<String, dynamic>> _post(String endpoint, Map body) async {
+  // Get current user email
+  static String? getUserEmail() {
+    return _userEmail;
+  }
+
+  // Auto-detect working backend URL (cached for performance)
+  static Future<String> _getWorkingUrl() async {
+    // If already tested and working, reuse it
+    if (_connectionTested) {
+      return baseUrl;
+    }
+
+    // If manual IP is set, use it
+    if (ApiConfig.manualDeviceIp != null) {
+      baseUrl = "http://${ApiConfig.manualDeviceIp}";
+      _connectionTested = true;
+      return baseUrl;
+    }
+
+    // Try primary URL first
     try {
-      final url = Uri.parse('$baseUrl$endpoint');
+      final response = await http
+          .get(Uri.parse('$baseUrl/'))
+          .timeout(const Duration(seconds: 3));
+      if (response.statusCode == 200 || response.statusCode == 301) {
+        _connectionTested = true;
+        return baseUrl; // Primary URL works!
+      }
+    } catch (e) {
+      print('Primary URL failed: $e');
+    }
+
+    // Try fallback URLs
+    for (String fallbackUrl in ApiConfig.fallbackUrls) {
+      try {
+        final response = await http
+            .get(Uri.parse('$fallbackUrl/'))
+            .timeout(const Duration(seconds: 3));
+        if (response.statusCode == 200 || response.statusCode == 301) {
+          baseUrl = fallbackUrl;
+          _connectionTested = true;
+          print('✅ Connected to backend at: $baseUrl');
+          return baseUrl; // Found working URL!
+        }
+      } catch (e) {
+        print('Fallback URL $fallbackUrl failed, trying next...');
+      }
+    }
+
+    // If nothing works, use primary (show error on next request)
+    _connectionTested = true;
+    print('❌ No backend found, using primary: $baseUrl');
+    return baseUrl;
+  }
+
+  // Get request with auth header and auto-detection
+  static Future<Map<String, dynamic>> _get(String endpoint) async {
+    try {
+      final url = Uri.parse('${await _getWorkingUrl()}$endpoint');
       final headers = {
         'Content-Type': 'application/json',
         if (_token != null) 'Authorization': 'Bearer $_token',
       };
 
-      print('REQUEST to $baseUrl$endpoint: $body');
+      final res = await http
+          .get(url, headers: headers)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () => throw Exception('Request timeout'),
+          );
 
-      final res = await http.post(
-        url,
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      print('GET REQUEST to $endpoint');
+      print('RESPONSE ${res.statusCode}: ${res.body}');
+
+      try {
+        final decoded = jsonDecode(res.body);
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          return {'success': true, 'data': decoded};
+        } else {
+          return {
+            'success': false,
+            'message': decoded['message'] ?? decoded.toString(),
+          };
+        }
+      } catch (e) {
+        return {'success': false, 'message': 'Parse error: $e'};
+      }
+    } catch (e) {
+      print('GET Error: $e');
+      return {
+        'success': false,
+        'message': 'Connection error: $e. Make sure backend is running!',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> _post(String endpoint, Map body) async {
+    try {
+      final url = Uri.parse('${await _getWorkingUrl()}$endpoint');
+      final headers = {
+        'Content-Type': 'application/json',
+        if (_token != null) 'Authorization': 'Bearer $_token',
+      };
+
+      print('REQUEST to ${await _getWorkingUrl()}$endpoint: $body');
+
+      final res = await http
+          .post(url, headers: headers, body: jsonEncode(body))
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () => throw Exception('Request timeout'),
+          );
 
       print('RESPONSE ${res.statusCode}: ${res.body}');
 
-      final decoded = jsonDecode(res.body);
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        return {'success': true, 'data': decoded};
-      } else {
-        return {
-          'success': false,
-          'message': decoded['message'] ?? decoded.toString(),
-        };
+      try {
+        final decoded = jsonDecode(res.body);
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          return {'success': true, 'data': decoded};
+        } else {
+          return {
+            'success': false,
+            'message': decoded['message'] ?? decoded.toString(),
+          };
+        }
+      } catch (e) {
+        return {'success': false, 'message': 'Response parse error: $e'};
       }
     } catch (e) {
       print('HTTP POST Error: $e');
-      return {'success': false, 'message': 'Connection error: $e'};
+      return {
+        'success': false,
+        'message': 'Connection error: $e. Make sure backend is running!',
+      };
     }
   }
 
@@ -290,7 +375,7 @@ class AuthServices {
 
   // Create complaint
   static Future<Map<String, dynamic>> createComplaint(Complaint complaint) {
-    return _post('/complaints/', complaint.toJson());
+    return _post('/complaints/register/', complaint.toJson());
   }
 
   // Update complaint
@@ -312,7 +397,7 @@ class AuthServices {
       if (_token != null) 'Authorization': 'Bearer $_token',
     };
 
-    final res = await http.patch(
+    final res = await http.post(
       url,
       headers: headers,
       body: jsonEncode({'status': status}),
