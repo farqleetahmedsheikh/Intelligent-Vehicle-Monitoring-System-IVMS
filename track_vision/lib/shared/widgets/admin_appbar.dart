@@ -1,6 +1,5 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:track_vision/features/auth/providers/admin_provider.dart';
 import 'package:track_vision/features/user/alerts/widgets/showalerts.dart';
 import 'package:track_vision/features/user/profile/widgets/profile_edit.dart';
 import 'package:track_vision/shared/providers/auth_notifier.dart';

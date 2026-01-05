@@ -6,8 +6,10 @@ final uBottomNavIndexProvider = StateProvider<int>((ref) => 0);
 
 // state for user AppBar
 final uNotificationCountProvider = StateProvider<int>((ref) => 0);
-final uUserNameProvider = StateProvider<String>((ref) => "F");
+final uUserNameProvider = StateProvider<String>((ref) => "User");
 final uUserEmailProvider = StateProvider<String>((ref) => "user@example.com");
+final uUserPhoneProvider = StateProvider<String?>((ref) => null);
+final uUserCnicProvider = StateProvider<String?>((ref) => null);
 final uIsLoggedInProvider = StateProvider<bool>((ref) => false);
 
 // state for user complaints

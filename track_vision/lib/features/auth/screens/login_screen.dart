@@ -5,6 +5,7 @@ import 'package:track_vision/shared/providers/auth_notifier.dart';
 import 'package:track_vision/shared/providers/auth_state.dart';
 import 'package:track_vision/shared/widgets/user_bottom_navbar.dart';
 import 'package:track_vision/core/config/constants.dart';
+import 'package:track_vision/core/services/api_service.dart';
 import 'package:track_vision/features/auth/providers/user_provider.dart';
 
 class LogIn extends ConsumerStatefulWidget {
@@ -195,6 +196,9 @@ class _LogInState extends ConsumerState<LogIn> {
                         ref.read(uUserEmailProvider.notifier).state =
                             displayEmail;
                         ref.read(uIsLoggedInProvider.notifier).state = true;
+
+                        // Store user email in API service for complaints
+                        AuthServices.setUserEmail(displayEmail);
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("Login successful!")),

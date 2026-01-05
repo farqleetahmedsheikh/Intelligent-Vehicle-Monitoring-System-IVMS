@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // ignore: implementation_imports
 import 'package:track_vision/features/auth/providers/user_provider.dart';
+import 'package:track_vision/core/services/api_service.dart';
 import 'package:track_vision/shared/providers/data_providers.dart';
 import 'package:track_vision/shared/models/complaint_model.dart';
 import 'package:track_vision/core/config/constants.dart';
@@ -38,12 +39,30 @@ class _UserComplaintsSubmitState extends ConsumerState<UserComplainsSubmit> {
 
   void _submitComplaint() async {
     if (_formKey.currentState!.validate()) {
+      // Get user data from providers and API service
+      final userName = ref.read(uUserNameProvider);
+      final userEmail =
+          AuthServices.getUserEmail() ?? ref.read(uUserEmailProvider);
+      final userPhone = ref.read(uUserPhoneProvider) ?? '';
+      final userCnic = ref.read(uUserCnicProvider) ?? '';
+
+      // Validate that we have at least email
+      if (userEmail == null || userEmail.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error: User email not found. Please login again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       final complaint = Complaint(
         id: 0,
-        ownerName: '',
-        ownerEmail: '',
-        ownerPhone: '',
-        ownerCnic: '',
+        ownerName: userName.isNotEmpty ? userName : 'Unknown',
+        ownerEmail: userEmail,
+        ownerPhone: userPhone,
+        ownerCnic: userCnic,
         vehicleMake: _carMake.text.trim(),
         vehicleModel: _carModel.text.trim(),
         vehicleVariant: _carVariant.text.trim(),
