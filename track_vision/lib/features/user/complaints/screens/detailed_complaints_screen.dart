@@ -20,7 +20,6 @@ class _DetailedComplaintsScreenState
   int _currentPage = 1;
   int _totalPages = 1;
   int _limit = 10;
-  int _total = 0;
 
   @override
   void initState() {
@@ -60,7 +59,6 @@ class _DetailedComplaintsScreenState
       if (response['success']) {
         setState(() {
           _complaints = response['complaints'];
-          _total = response['total'];
           _totalPages = response['totalPages'];
           _currentPage = response['page'];
           _isLoading = false;
@@ -125,11 +123,7 @@ class _DetailedComplaintsScreenState
               else if (_error != null)
                 Column(
                   children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 60,
-                    ),
+                    Icon(Icons.error_outline, color: Colors.red, size: 60),
                     const SizedBox(height: 20),
                     Text(
                       _error!,
@@ -143,10 +137,7 @@ class _DetailedComplaintsScreenState
               else if (_complaints.isEmpty)
                 Text(
                   'No complaints posted yet.',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey.shade700,
-                  ),
+                  style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
                 )
               else
                 Expanded(
@@ -222,8 +213,9 @@ class _DetailedComplaintsScreenState
                   ),
                   const SizedBox(width: 20),
                   ElevatedButton(
-                    onPressed:
-                        _currentPage < _totalPages ? _goToNextPage : null,
+                    onPressed: _currentPage < _totalPages
+                        ? _goToNextPage
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryBlue,
                       foregroundColor: Colors.white,
@@ -235,10 +227,7 @@ class _DetailedComplaintsScreenState
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      'Next',
-                      style: TextStyle(fontSize: 16),
-                    ),
+                    child: const Text('Next', style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),

@@ -127,8 +127,12 @@ class _UploadDetectionState extends ConsumerState<UploadDetection> {
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
-        title: const Text('Upload Detection'),
+        title: const Text(
+          'Upload Detection',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: AppColors.primaryBlue,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
