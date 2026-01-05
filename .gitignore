@@ -71,3 +71,39 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# PyTorch / Torch weights
+*.pt
+*.pth
+*.ckpt
+
+# YOLO / Ultralytics outputs
+runs/
+weights/
+logs/
+
+# Dataset caches
+*.cache
+datasets/__pycache__/
+datasets/*/labels/*.cache
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.DS_Store
+*.log
+
+# Jupyter / Notebook files
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE specific
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Misc
+*.zip
+*.tar.gz

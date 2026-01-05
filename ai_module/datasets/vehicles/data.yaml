@@ -1,0 +1,10 @@
+path: .
+
+train: ./datasets/vehicles/images
+val: ./datasets/vehicles/images
+
+names:
+  0: car
+  1: bike
+  2: bus
+  3: truck
