@@ -65,6 +65,7 @@ export default function SubmitComplaintPage() {
     }
 
     try {
+      console.log(finalData)
       const response = await registerComplaint(finalData);
       if (response.data.email_status.includes("Failed")) {
         setMessage(
@@ -114,6 +115,15 @@ export default function SubmitComplaintPage() {
                 type="email"
                 value={formData.ownerEmail}
                 placeholder={"Ex. example@example.com"}
+                onChange={handleChange}
+                style={{ width: "90%" }}
+              />
+              <InputField
+                label="Owner Name"
+                name="ownerName"
+                type="text"
+                value={formData.ownerName}
+                placeholder={"Ex. Ali"}
                 onChange={handleChange}
                 style={{ width: "90%" }}
               />

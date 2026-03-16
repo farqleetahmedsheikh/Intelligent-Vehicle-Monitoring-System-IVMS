@@ -5,6 +5,7 @@ from django.urls import path
 from users.views import RegisterView, LoginView, ForgotPasswordView, VerifyOTPView, ResetPasswordView, get_profile, update_profile
 from django.conf.urls.static import static
 from pathlib import Path
+from detection.views import DetectVehicleAPIView
 
 VEHICLE_PICTURES_ROOT = Path(__file__).resolve().parent.parent / "vehicle_pictures"
 
@@ -37,6 +38,8 @@ urlpatterns = [
     path("alerts/user/", get_user_alerts, name="get-user-alerts"),
     path("alerts/<int:alert_id>/mark-read/", mark_alert_read, name="mark-alert-read"),
     path("alerts/<int:alert_id>/", get_alert_details, name="get_alert_details"),
+
+     path("detect/", DetectVehicleAPIView.as_view(), name="detect_vehicle"),
 ]
 
 if settings.DEBUG:

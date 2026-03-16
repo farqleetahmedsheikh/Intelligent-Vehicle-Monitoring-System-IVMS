@@ -1,66 +1,68 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from django.core.files.base import ContentFile
+import tempfile
+import os
 import cv2
 
-from .yolo.plate_detect import detect_plate_and_read
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework import status
+
 from complaints.models import Complaint
-from alerts.models import Alert
-from routes.models import RouteHistory
-from alerts.email_service import send_alert_email
-from routes.route_prediction import predict_routes
+from ai_module.plate_detector import detect_plate_and_read
+
 
 class DetectVehicleAPIView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
     def post(self, request):
-        image = request.FILES.get("image")
-        location = request.data.get("location", "Unknown")
+
+        image = request.FILES.get("images")
 
         if not image:
-            return Response({"error": "Image is required"}, status=400)
+            return Response(
+                {"error": "Image required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        temp_path = "/tmp/input.jpg"
-        with open(temp_path, "wb+") as f:
+        # Save temporary image
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp:
             for chunk in image.chunks():
-                f.write(chunk)
+                temp.write(chunk)
 
-        plate, crop_img = detect_plate_and_read(temp_path)
+            temp_path = temp.name
 
-        if not plate:
-            return Response({"message": "No plate found"}, status=200)
+        try:
+            plate, crop = detect_plate_and_read(temp_path)
 
-        complaint = Complaint.objects.filter(plate_number__iexact=plate).first()
+            if not plate:
+                return Response({
+                    "status": "no_plate_detected"
+                })
 
-        if not complaint:
-            return Response({"status": "not_reported", "plate": plate})
+            # Normalize plate
+            plate = plate.replace(" ", "").replace("-", "").upper()
 
-        # convert crop image to Django file
-        _, buffer = cv2.imencode(".jpg", crop_img)
-        image_file = ContentFile(buffer.tobytes(), name=f"{plate}.jpg")
+            # Check database
+            complaint = Complaint.objects.filter(
+                plateNumber__iexact=plate
+            ).first()
 
-        # save alert in database
-        alert = Alert.objects.create(
-            complaint=complaint,
-            location=location,
-            evidence_image=image_file
-        )
+            if complaint:
 
-        # save route history for ML
-        RouteHistory.objects.create(
-            plate_number=plate,
-            location=location
-        )
+                # Optional debug save
+                cv2.imwrite("detected_plate.jpg", crop)
 
-        # route prediction AI
-        routes = predict_routes(plate, location)
+                return Response({
+                    "status": "stolen_vehicle_detected",
+                    "plate": plate,
+                    "complaint_id": complaint.id
+                })
 
-        # send email alerts
-        send_alert_email(complaint.user.email, plate, location)
-        send_alert_email("admin@example.com", plate, location)
+            return Response({
+                "status": "vehicle_not_reported",
+                "plate": plate
+            })
 
-        return Response({
-            "status": "match_found",
-            "plate": plate,
-            "complaint_id": complaint.id,
-            "alert_id": alert.id,
-            "routes": routes
-        })
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
