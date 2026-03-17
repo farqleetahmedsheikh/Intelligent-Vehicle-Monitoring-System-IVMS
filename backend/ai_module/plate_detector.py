@@ -4,7 +4,7 @@ import cv2
 import re
 
 # Use a YOLO model trained for license plates
-model = YOLO("yolo11n.pt")  # replace with actual plate detector
+model = YOLO("yolo11n.pt")
 reader = easyocr.Reader(['en'])
 
 def detect_plate_and_read(image_path):
