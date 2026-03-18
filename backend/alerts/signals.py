@@ -6,6 +6,13 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+import re
+
+
+# 🔧 Helper to clean group names
+def clean_group_name(name):
+    return re.sub(r"[^a-zA-Z0-9_\-\.]", "_", name)
+
 
 @receiver(post_save, sender=Detection)
 def create_alert_when_detected(sender, instance, created, **kwargs):
@@ -14,35 +21,42 @@ def create_alert_when_detected(sender, instance, created, **kwargs):
 
     complaint = instance.complaint
 
-    message = f"Your stolen vehicle with plate {complaint.plateNumber} was detected at {instance.locationDetected}."
+    # ✅ Safe message
+    message = f"Your stolen vehicle with plate {complaint.plateNumber} was detected at {instance.locationText or 'Unknown location'}."
 
+    # ✅ Create alert
     alert = Alert.objects.create(
         detection=instance,
         alertMessage=message,
         alertImage=instance.detectedImage
     )
 
-    # SEND REAL-TIME ALERT
+    # ==============================
+    # 🔥 REAL-TIME ALERT (FIXED)
+    # ==============================
+
     channel_layer = get_channel_layer()
 
     alert_data = {
         "id": alert.id,
         "alertType": alert.alertType,
         "alertMessage": alert.alertMessage,
-        "alertImage": str(alert.alertImage.url) if alert.alertImage else None,
+        "alertImage": alert.alertImage.url if alert.alertImage else None,
         "sentAt": str(alert.sentAt),
     }
 
-    # SEND TO USER
+    # ✅ SAFE USER GROUP (use ID or clean email)
+    user_group = clean_group_name(f"alerts_user_{complaint.id}")
+
     async_to_sync(channel_layer.group_send)(
-        f"alerts_{complaint.ownerEmail}",
+        user_group,
         {
             "type": "send_alert",
             "data": alert_data
         }
     )
 
-    # SEND TO ADMINS
+    # ✅ ADMIN GROUP (already safe)
     async_to_sync(channel_layer.group_send)(
         "alerts_admin",
         {
@@ -51,22 +65,26 @@ def create_alert_when_detected(sender, instance, created, **kwargs):
         }
     )
 
-    # Email code stays same...
+    # ==============================
+    # 📧 EMAIL ALERT (SAFE)
+    # ==============================
 
+    try:
+        html_content = render_to_string("email/vehicle_detected_alert.html", {
+            "ownerName": complaint.ownerName,
+            "plate": complaint.plateNumber,
+            "location": instance.locationText or "Unknown",
+            "time": instance.detectedAt,
+        })
 
-    # Send email to user
-    html_content = render_to_string("emails/vehicle_detected_alert.html", {
-        "ownerName": complaint.ownerName,
-        "plate": complaint.plateNumber,
-        "location": instance.locationDetected,
-        "time": instance.detectedAt,
-    })
+        email = EmailMultiAlternatives(
+            subject="Vehicle Detection Alert",
+            body="Vehicle detected!",
+            from_email="trackvision240@gmail.com",
+            to=[complaint.ownerEmail],
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send()
 
-    email = EmailMultiAlternatives(
-        subject="Vehicle Detection Alert",
-        body="",
-        from_email="trackvision240@gmail.com",
-        to=[complaint.ownerEmail],
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
+    except Exception as e:
+        print("Email sending failed:", str(e))

@@ -6,12 +6,13 @@ from users.views import RegisterView, LoginView, ForgotPasswordView, VerifyOTPVi
 from django.conf.urls.static import static
 from pathlib import Path
 from detection.views import DetectVehicleAPIView
+from alerts.views import AlertDetailView, UserAlertsView
 
 VEHICLE_PICTURES_ROOT = Path(__file__).resolve().parent.parent / "vehicle_pictures"
+DETECTED_VEHICLE_PICTURES_ROOT = Path(__file__).resolve().parent.parent / "vehicle_pictures"
 
 # Import complaint views
 from complaints.views import register_complaint, search_complaint, complaint_list, get_complaint, update_complaint_status, get_all_complaints
-from alerts.views import get_user_alerts, get_alert_details, mark_alert_read
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -35,13 +36,14 @@ urlpatterns = [
 
 
     # Alert APIs
-    path("alerts/user/", get_user_alerts, name="get-user-alerts"),
-    path("alerts/<int:alert_id>/mark-read/", mark_alert_read, name="mark-alert-read"),
-    path("alerts/<int:alert_id>/", get_alert_details, name="get_alert_details"),
+    path("alerts/", UserAlertsView.as_view(), name="get-user-alerts"),
+    path("alerts/<int:alert_id>/mark-read/", AlertDetailView.as_view(), name="mark-alert-read"),
+    path("alerts/<int:alert_id>/", AlertDetailView.as_view(), name="get_alert_details"),
 
-     path("detect/", DetectVehicleAPIView.as_view(), name="detect_vehicle"),
+    path("detect/", DetectVehicleAPIView.as_view(), name="detect_vehicle"),
+    path("detections/", DetectVehicleAPIView.as_view(), name="detections"),
 ]
 
 if settings.DEBUG:
-    urlpatterns += static('/vehicle_pictures/', document_root=VEHICLE_PICTURES_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     

@@ -1,19 +1,53 @@
 /** @format */
+
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/";
+const API_BASE = "http://127.0.0.1:8000/";
 
-// Fetch all alerts for the logged-in user
-export const fetchAlerts = async () => {
-  return axios.get(`${API_BASE}alerts/`);
+// ✅ 1. Get user alerts
+export const fetchUserAlerts = async () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  try {
+    const response = await axios.get(`${API_BASE}alerts/`, {
+      params: {
+        email: user.email,
+        role: user.role,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching alerts:", error);
+    throw error;
+  }
 };
 
-// Fetch single alert by ID
-export const getAlertDetails = async (id) => {
-  return axios.get(`${API_BASE}alerts/${id}/`);
+
+// ✅ 2. Mark alert as read
+export const markAlertAsRead = async (alertId) => {
+  try {
+    const response = await axios.patch(
+      `${API_BASE}alerts/${alertId}/mark-read/`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error marking alert as read:", error);
+    throw error;
+  }
 };
 
-// Mark alert as read
-export const markAlertRead = async (id) => {
-  return axios.patch(`${API_BASE}alerts/${id}/`, { isRead: true });
+
+// ✅ 3. Get alert details
+export const fetchAlertDetails = async (alertId) => {
+  try {
+    const response = await axios.get(
+      `${API_BASE}alerts/${alertId}/`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching alert details:", error);
+    throw error;
+  }
 };

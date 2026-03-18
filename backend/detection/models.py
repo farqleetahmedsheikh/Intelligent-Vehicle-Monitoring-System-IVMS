@@ -12,7 +12,7 @@ class Detection(models.Model):
     longitude = models.FloatField(null=True, blank=True)
 
     # Image captured by mobile camera
-    detectedImage = models.ImageField(upload_to="detections/", null=True, blank=True)
+    detectedImage = models.ImageField(upload_to="detected_vehicle_pictures/", null=True, blank=True)
 
     detectedAt = models.DateTimeField(auto_now_add=True)
 

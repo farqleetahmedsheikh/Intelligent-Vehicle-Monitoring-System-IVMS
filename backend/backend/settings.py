@@ -190,5 +190,17 @@ EMAIL_HOST_PASSWORD = 'effl pesz xmht dzrk'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR/'/vehicle_pictures',  # <-- your images folder
+    BASE_DIR / "static",  # your project static files
 ]
+
+# MEDIA FILES (uploaded/generated files)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media"  # all uploaded files go here
+
+# Subfolders inside MEDIA_ROOT
+VEHICLE_PICTURES_FOLDER = MEDIA_ROOT / "vehicle_pictures"
+DETECTED_VEHICLES_FOLDER = MEDIA_ROOT / "detected_vehicle_pictures"
+
+# Ensure the folders exist
+VEHICLE_PICTURES_FOLDER.mkdir(parents=True, exist_ok=True)
+DETECTED_VEHICLES_FOLDER.mkdir(parents=True, exist_ok=True)

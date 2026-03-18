@@ -2,46 +2,75 @@
 
 import { useEffect, useState } from "react";
 import "./styles/AlertsDropdown.css";
-
-const mockAlerts = [
-  {
-    id: 1,
-    title: "Stolen vehicle detected",
-    desc: "Plate ABC-123 near I-90",
-    time: "2m",
-  },
-  {
-    id: 2,
-    title: "Vehicle matched watchlist",
-    desc: "Plate XYZ-456 at Mall St",
-    time: "20m",
-  },
-  {
-    id: 3,
-    title: "Camera offline",
-    desc: "Camera #4 lost connection",
-    time: "1h",
-  },
-];
+import {
+  fetchUserAlerts,
+  markAlertAsRead,
+} from "../../api/alertApi";
+import { formatTime } from "../lib/formatTime";
 
 const AlertsDropdown = () => {
   const [alerts, setAlerts] = useState([]);
+  const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : null;
+
+  // ✅ Fetch alerts
+  const loadAlerts = async () => {
+    try {
+      const data = await fetchUserAlerts();
+
+      const formatted = data.map((a) => ({
+        id: a.id,
+        title: "Stolen vehicle detected",
+        desc: `Plate ${a.detection?.complaint?.plateNumber || "Unknown"} at ${a.detection?.locationText || "Unknown location"
+          }`,
+        time: formatTime(a.sentAt),
+        isRead: a.isRead,
+      }));
+
+      setAlerts(formatted);
+    } catch (error) {
+      console.error("Failed to load alerts:", error);
+    }
+  };
 
   useEffect(() => {
-    // TODO: replace mock with API call to /api/alerts?limit=5
-    setAlerts(mockAlerts);
-  }, []);
+    loadAlerts();
+  }, [user?.email]);
+
+  // ✅ Mark single alert as read
+  const handleMarkRead = async (id) => {
+    try {
+      await markAlertAsRead(id);
+
+      setAlerts((prev) =>
+        prev.map((a) =>
+          a.id === id ? { ...a, isRead: true } : a
+        )
+      );
+    } catch (error) {
+      console.error("Error marking alert as read:", error);
+    }
+  };
+
+  // ✅ Mark all as read (frontend only for now)
+  const handleMarkAllRead = async () => {
+    try {
+      await Promise.all(alerts.map((a) => markAlertAsRead(a.id)));
+
+      setAlerts((prev) =>
+        prev.map((a) => ({ ...a, isRead: true }))
+      );
+    } catch (error) {
+      console.error("Error marking all alerts:", error);
+    }
+  };
 
   return (
     <div className="alerts-dropdown" role="list" aria-label="Recent alerts">
       <div className="alerts-header">
         <strong>Alerts</strong>
-        <button
-          className="mark-read"
-          onClick={() => {
-            /* API mark all read */
-          }}
-        >
+        <button className="mark-read" onClick={handleMarkAllRead} style={{ color: '#FFF' }}>
           Mark all read
         </button>
       </div>
@@ -51,14 +80,20 @@ const AlertsDropdown = () => {
           <div className="empty">No alerts</div>
         ) : (
           alerts.map((a) => (
-            <div key={a.id} className="alert-item">
+            <div
+              key={a.id}
+              className={`alert-item ${a.isRead ? "read" : "unread"}`}
+              onClick={() => handleMarkRead(a.id)}
+            >
               <div className="ai">
-                <div className="alert-dot" />
+                {!a.isRead && <div className="alert-dot" />}
               </div>
+
               <div className="ad">
                 <div className="title">{a.title}</div>
                 <div className="desc">{a.desc}</div>
               </div>
+
               <div className="atime">{a.time}</div>
             </div>
           ))

@@ -1,5 +1,4 @@
 /** @format */
-
 import { useNavigate } from "react-router-dom";
 import DashboardCard from "../../components/DashboardCard";
 import "../../styles/Dashboard.css";
@@ -9,73 +8,65 @@ import Loader from "../../components/Loader";
 import { fetchAllComplaints } from "../../../api/complaintApi";
 import VehicleTable from "../../components/VehicleTable";
 import MapPreview from "../../components/MapPreview";
+import { fetchDetections } from "../../../api/detectionApi";
+import { formatTime } from "../../lib/formatTime";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [complaints, setComplaints] = useState([]);
+  const [detections, setDetections] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
 
   useEffect(() => {
-    const fetchComplaints = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetchAllComplaints();
 
-        if (response.status !== 200) throw new Error("Failed to fetch complaints");
+        const [complaintsRes, detectionsRes] = await Promise.all([
+          fetchAllComplaints(),
+          fetchDetections(),
+        ]);
 
-        setComplaints(response.data.complaints);
+        setComplaints(complaintsRes.data.complaints);
+        console.log(detectionsRes)
+        const formattedDetections = detectionsRes.map((d) => ({
+          plate: d.plateNumber,
+          model: d.vehicleModel || "Unknown",
+          status: d.status || "Detected",
+          lastSeen: formatTime(d.detectedAt),
+          location: d.location,
+        }));
+
+
+        setDetections(formattedDetections);
       } catch (error) {
-        console.error("Error Console", error);
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchComplaints();
+    fetchData();
+  }, [user?.email, navigate]);
 
-    // Only run when user.email changes (instead of full user object)
-  }, [navigate, user?.email]);
-
-const detections = [
-  {
-    plate: "ABC-123",
-    model: "Toyota Corolla",
-    status: "Investigating",
-    lastSeen: "2 min ago",
-  },
-  {
-    plate: "XYZ-456",
-    model: "Honda Civic",
-    status: "Resolved",
-    lastSeen: "10 min ago",
-  },
-  {
-    plate: "DEF-789",
-    model: "Suzuki Swift",
-    status: "Closed",
-    lastSeen: "30 min ago",
-  },
-  {
-    plate: "GHI-012",
-    model: "Tesla Model 3",
-    status: "Resolved",
-    lastSeen: "1 hr ago",
-  },
-  {
-    plate: "JKL-345",
-    model: "BMW X5",
-    status: "Active",
-    lastSeen: "2 hrs ago",
-  },
-];
   const totalReports = complaints.length;
-  const pendingInvestigations = complaints.filter(c => c.status === "investigating").length;
-  const resolvedCases = complaints.filter(c => c.status === "resolved").length;
+  const pendingInvestigations = complaints.filter(
+    (c) => c.status === "investigating"
+  ).length;
+  const resolvedCases = complaints.filter((c) => c.status === "resolved").length;
   const closedCases = complaints.filter((c) => c.status === "closed").length;
+
   if (loading) return <Loader />;
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-body">
@@ -98,24 +89,21 @@ const detections = [
               value={resolvedCases}
               icon={<CheckCircle />}
             />
-             <DashboardCard
-            title="Closed Cases"
-            value={closedCases}
-            icon={<FileCheck />}
-          />
+            <DashboardCard
+              title="Closed Cases"
+              value={closedCases}
+              icon={<FileCheck />}
+            />
           </div>
 
-        <div className="vehicle-map-container">
-          {/* Latest Detections Table */}
-          <div className="vehicle-card">
-            <VehicleTable vehicles={detections} title="Latest Detections" />
+          <div className="vehicle-map-container">
+            <div className="vehicle-card">
+              <VehicleTable vehicles={detections} title="Latest Detections" />
+            </div>
+            <div className="map-card">
+              <MapPreview height={300} />
+            </div>
           </div>
-
-          {/* Map Preview */}
-          <div className="map-card">
-            <MapPreview height={300} />
-          </div>
-        </div>
         </div>
       </div>
     </div>

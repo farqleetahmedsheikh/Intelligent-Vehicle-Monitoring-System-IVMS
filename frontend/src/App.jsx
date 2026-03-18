@@ -21,6 +21,7 @@ import UserComplaints from "./pages/user/CompaintPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminComplaints from "./pages/admin/AdminComplaint";
 import ConfigureCamera from "./pages/admin/ConfigureCamera";
+import AlertDetailsPage from "./pages/common/AlertDetailsPage";
 
 const renderSharedDashboardRoutes = () => (
   <>
@@ -50,6 +51,7 @@ function App() {
             <Route path="home" element={<UserDashboard />} />
             {renderSharedDashboardRoutes()}
             <Route path="my-complaints" element={<UserComplaints />} />
+            <Route path="alerts/:alertId" element={<AlertDetailsPage />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
@@ -59,6 +61,7 @@ function App() {
             {renderSharedDashboardRoutes()}
             <Route path="camera/configure" element={<ConfigureCamera />} />
             <Route path="my-complaints" element={<AdminComplaints />} />
+            <Route path="alerts/:alertId" element={<AlertDetailsPage />} />
           </Route>
         </Route>
         <Route path="*" element={<NotFound />} />

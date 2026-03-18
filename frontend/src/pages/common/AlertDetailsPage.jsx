@@ -4,7 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/AlertDetails.css";
 import Loader from "../../components/Loader";
 import Button from "../../components/Button";
-import { getAlertDetails, markAlertRead } from "../../../api/alertApi";
+import { fetchAlertDetails, markAlertAsRead } from "../../../api/alertApi";
+import { ArrowLeft } from "lucide-react";
 
 export default function AlertDetailsPage() {
   const navigate = useNavigate();
@@ -14,16 +15,18 @@ export default function AlertDetailsPage() {
   const [isRead, setIsRead] = useState(false);
 
   useEffect(() => {
-    fetchAlertDetails();
+    fetchDetails();
   }, []);
 
-  const fetchAlertDetails = async () => {
+  const fetchDetails = async () => {
     try {
-      const res = await getAlertDetails(alertId);
-      setAlert(res.data);
-      setIsRead(res.data.isRead);
+      const data = await fetchAlertDetails(alertId);
+      console.log(data)
+      setAlert(data);
+      setIsRead(data.isRead);
     } catch (err) {
       console.error("Error fetching alert details:", err);
+      setAlert(null);
     } finally {
       setLoading(false);
     }
@@ -33,24 +36,22 @@ export default function AlertDetailsPage() {
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      navigate("/"); // fallback route if no history
+      navigate("/alerts");
     }
   };
 
   const handleMarkAsRead = async () => {
     try {
-      await markAlertRead(alertId);
+      await markAlertAsRead(alertId);
       setIsRead(true);
-      alert("Marked as read!");
     } catch (err) {
-      console.error(err);
+      console.error("Error marking alert as read:", err);
     }
   };
 
   if (loading) return <Loader />;
 
-  if (!alert)
-    return <p className="alert-error">Alert not found or has been deleted.</p>;
+  if (!alert) return <p className="alert-error">Alert not found or has been deleted.</p>;
 
   return (
     <div className="alert-details-container">
@@ -61,35 +62,10 @@ export default function AlertDetailsPage() {
 
       <div className="alert-card">
         <div className="alert-info">
-          <h3>Vehicle Information</h3>
-          <p>
-            <strong>Plate Number:</strong> {alert.plateNumber}
-          </p>
-          <p>
-            <strong>Model:</strong> {alert.vehicleModel}
-          </p>
-          <p>
-            <strong>Color:</strong> {alert.vehicleColor}
-          </p>
-
-          <h3>Detection Details</h3>
-          <p>
-            <strong>Detected At:</strong> {alert.detectedAt}
-          </p>
-          <p>
-            <strong>Location:</strong> {alert.detectedLocation}
-          </p>
-          <p>
-            <strong>Possible Route:</strong> {alert.predictedRoute || "N/A"}
-          </p>
-
-          <h3>Owner</h3>
-          <p>
-            <strong>Email:</strong> {alert.ownerEmail}
-          </p>
-          <p>
-            <strong>CNIC:</strong> {alert.ownerCnic}
-          </p>
+          <h3>Alert Information</h3>
+          <p><strong>Message:</strong> {alert.alertMessage || "N/A"}</p>
+          <p><strong>Type:</strong> {alert.alertType || "N/A"}</p>
+          <p><strong>Sent At:</strong> {alert.sentAt ? new Date(alert.sentAt).toLocaleString() : "N/A"}</p>
 
           <div className="alert-status">
             <span className={isRead ? "status-read" : "status-unread"}>
@@ -98,7 +74,11 @@ export default function AlertDetailsPage() {
           </div>
 
           {!isRead && (
-            <Button label="Mark as Read" onClick={handleMarkAsRead} />
+            <Button
+              label="Mark as Read"
+              onClick={handleMarkAsRead}
+              style={{ width: "auto", color: "#FFF" }}
+            />
           )}
         </div>
 

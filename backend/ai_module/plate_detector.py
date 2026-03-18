@@ -13,8 +13,8 @@ def detect_plate_and_read(image_path):
 
     for r in results:
         for box in r.boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            crop = image[y1:y2, x1:x2]
+            # x1, y1, x2, y2 = map(int, box.xyxy[0])
+            # crop = image[y1:y2, x1:x2]
 
             # # ---------- PREPROCESS ----------
             # gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
@@ -32,7 +32,6 @@ def detect_plate_and_read(image_path):
             #     255,
             #     cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
             #     cv2.THRESH_BINARY,
-            #     11,
             #     2
             # )
 
@@ -48,9 +47,9 @@ def detect_plate_and_read(image_path):
                 print("PLATE------------->", plate)
 
                 # Optional: save debug images
-                cv2.imwrite("debug_plate.jpg", crop)
+                cv2.imwrite("debug_plate.jpg", image)
                 cv2.imwrite("debug_processed_plate.jpg", image)
 
-                return plate, crop
+                return plate
 
     return None, None
