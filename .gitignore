@@ -41,6 +41,7 @@ env/
 
 # Ignore uploaded images / media
 vehicle_pictures/
+backend/media/
 
 # ==============================
 # Frontend (React / Node)

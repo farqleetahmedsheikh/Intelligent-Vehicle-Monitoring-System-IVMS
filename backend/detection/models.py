@@ -18,3 +18,16 @@ class Detection(models.Model):
 
     def __str__(self):
         return f"Detection of {self.complaint.plateNumber}"
+    
+class UnknownVehicle(models.Model):
+    vehicleColor = models.CharField(max_length=50, null=True, blank=True)
+    detectedAt = models.DateTimeField(auto_now_add=True)
+
+    locationText = models.CharField(max_length=255, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
+    image = models.ImageField(upload_to="unknown_vehicles/", null=True, blank=True)
+
+    def __str__(self):
+        return f"Unknown Vehicle - {self.detectedAt}"

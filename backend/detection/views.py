@@ -1,13 +1,14 @@
 import os
 import uuid
 import cv2
+
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils.timezone import now
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from rest_framework.permissions import AllowAny
 
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -16,16 +17,17 @@ from rest_framework import status
 from complaints.models import Complaint
 from ai_module.plate_detector import detect_plate_and_read
 from users.models import CustomUser
-from .models import Detection
+from .models import Detection, UnknownVehicle   # ✅ added here
 
 
-# Make sure this folder exists in your project
+# Folder for detected vehicle images
 DETECTED_IMAGES_FOLDER = os.path.join(settings.BASE_DIR, "media/detected_vehicle_pictures")
 os.makedirs(DETECTED_IMAGES_FOLDER, exist_ok=True)
 
 
 class DetectVehicleAPIView(APIView):
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [AllowAny]
 
     def send_alert_email(self, complaint, plate, location):
         admin_emails = list(CustomUser.objects.filter(role="admin").values_list("email", flat=True))
@@ -54,23 +56,68 @@ class DetectVehicleAPIView(APIView):
         email.attach_alternative(html_content, "text/html")
         email.send(fail_silently=False)
 
+    # ================== POST (DETECTION) ==================
     def post(self, request):
         image = request.FILES.get("images")
         if not image:
             return Response({"error": "Image required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Save temporary file for plate detection
         temp_filename = f"{uuid.uuid4().hex}.jpg"
         temp_path = os.path.join(DETECTED_IMAGES_FOLDER, temp_filename)
+
+        # Save temp image
         with open(temp_path, "wb") as f:
             for chunk in image.chunks():
                 f.write(chunk)
 
         try:
-            plate = detect_plate_and_read(temp_path)
-            if not plate:
-                return Response({"status": "no_plate_detected"})
+            plate, _ = detect_plate_and_read(temp_path)
 
+            # =========================================================
+            # 🚗 IF NO PLATE → SAVE UNKNOWN VEHICLE
+            # =========================================================
+            if not plate:
+
+                image_array = cv2.imread(temp_path)
+                if image_array is None:
+                    return Response({"error": "Invalid image"}, status=400)
+
+                # Simple color detection
+                avg_color = image_array.mean(axis=(0, 1))
+                blue, green, red = avg_color
+
+                if red > green and red > blue:
+                    color = "Red"
+                elif blue > red and blue > green:
+                    color = "Blue"
+                elif green > red and green > blue:
+                    color = "Green"
+                else:
+                    color = "Unknown"
+
+                filename = f"unknown_{uuid.uuid4().hex}.jpg"
+
+                success, buffer = cv2.imencode(".jpg", image_array)
+                image_bytes = buffer.tobytes()
+
+                unknown = UnknownVehicle.objects.create(
+                    vehicleColor=color,
+                    locationText="Camera 1 - Parking Area",
+                    latitude=24.8607,
+                    longitude=67.0011,
+                )
+
+                unknown.image.save(filename, ContentFile(image_bytes), save=True)
+
+                return Response({
+                    "status": "unknown_vehicle_saved",
+                    "color": color,
+                    "id": unknown.id
+                })
+
+            # =========================================================
+            # 🚗 IF PLATE FOUND → NORMAL DETECTION
+            # =========================================================
             plate = plate.replace(" ", "").replace("-", "").upper()
 
             complaint = Complaint.objects.filter(plateNumber__iexact=plate).first()
@@ -84,24 +131,19 @@ class DetectVehicleAPIView(APIView):
                 longitude=67.0011,
             )
 
-            # Save cropped plate image
-            plate_filename = f"plate_{uuid.uuid4().hex}.jpg"
-
-            # Read the temp image with OpenCV
+            # Save detected image
             image_array = cv2.imread(temp_path)
             if image_array is None:
-                raise ValueError(f"Failed to read image from temp_path: {temp_path}")
+                return Response({"error": "Invalid image"}, status=400)
 
-            # Encode to JPEG in memory
-            success, buffer = cv2.imencode('.jpg', image_array)
-            if not success:
-                raise ValueError("Failed to encode plate image to JPEG")
+            plate_filename = f"plate_{uuid.uuid4().hex}.jpg"
 
+            success, buffer = cv2.imencode(".jpg", image_array)
             image_bytes = buffer.tobytes()
 
-            # Save directly to Detection model
             detection.detectedImage.save(plate_filename, ContentFile(image_bytes), save=True)
 
+            # If vehicle is stolen → send email
             if complaint:
                 self.send_alert_email(complaint, plate, location)
                 return Response({
@@ -118,7 +160,8 @@ class DetectVehicleAPIView(APIView):
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
-    permission_classes = [AllowAny]  # ✅ disables auth for this API
+
+    # ================== GET (LIST DETECTIONS) ==================
     def get(self, request):
         role = request.query_params.get("role", "").lower()
         email = request.query_params.get("email", "").lower()
@@ -133,6 +176,7 @@ class DetectVehicleAPIView(APIView):
         data = []
         for d in detections:
             complaint = d.complaint
+
             data.append({
                 "id": d.id,
                 "plateNumber": complaint.plateNumber if complaint else None,
