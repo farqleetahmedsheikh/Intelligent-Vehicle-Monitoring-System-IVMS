@@ -17,7 +17,8 @@ from rest_framework import status
 from complaints.models import Complaint
 from ai_module.plate_detector import detect_plate_and_read
 from users.models import CustomUser
-from .models import Detection, UnknownVehicle   # ✅ added here
+from .models import Detection, UnknownVehicle
+# from .utils.route_prediction import predict_routes
 
 
 # Folder for detected vehicle images
@@ -59,9 +60,12 @@ class DetectVehicleAPIView(APIView):
     # ================== POST (DETECTION) ==================
     def post(self, request):
         image = request.FILES.get("images")
+        latitude = request.data.get("latitude")
+        longitude = request.data.get("longitude")
         if not image:
             return Response({"error": "Image required"}, status=status.HTTP_400_BAD_REQUEST)
-
+        latitude = float(latitude)
+        longitude = float(longitude)
         temp_filename = f"{uuid.uuid4().hex}.jpg"
         temp_path = os.path.join(DETECTED_IMAGES_FOLDER, temp_filename)
 
@@ -127,8 +131,8 @@ class DetectVehicleAPIView(APIView):
                 complaint=complaint if complaint else None,
                 deviceId="CAMERA_1",
                 locationText=location,
-                latitude=24.8607,
-                longitude=67.0011,
+                latitude=latitude,
+                longitude=longitude,
             )
 
             # Save detected image
@@ -142,6 +146,7 @@ class DetectVehicleAPIView(APIView):
             image_bytes = buffer.tobytes()
 
             detection.detectedImage.save(plate_filename, ContentFile(image_bytes), save=True)
+            # routes = predict_routes(latitude, longitude)
 
             # If vehicle is stolen → send email
             if complaint:
@@ -154,7 +159,8 @@ class DetectVehicleAPIView(APIView):
 
             return Response({
                 "status": "vehicle_not_reported",
-                "plate": plate
+                "plate": plate,
+                "routes": "routes"
             })
 
         finally:
@@ -192,3 +198,33 @@ class DetectVehicleAPIView(APIView):
             })
 
         return Response(data)
+    
+class AdminUnknownVehiclesAPIView(APIView):
+    permission_classes = [AllowAny]  # same as your Detect API
+
+    def get(self, request):
+        role = request.query_params.get("role", "").lower()
+        print("Role:", role)  # Debugging line
+
+        # 🔐 Manual admin check
+        if role != "admin":
+            return Response(
+                {"error": "Access denied"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        vehicles = UnknownVehicle.objects.all().order_by("-detectedAt")
+
+        data = []
+        for v in vehicles:
+            data.append({
+                "id": v.id,
+                "vehicleColor": v.vehicleColor,
+                "detectedAt": v.detectedAt,
+                "location": v.locationText,
+                "latitude": v.latitude,
+                "longitude": v.longitude,
+                "image": v.image.url if v.image else None,
+            })
+
+        return Response(data, status=200)
