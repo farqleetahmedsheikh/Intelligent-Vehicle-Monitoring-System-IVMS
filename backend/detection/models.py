@@ -1,7 +1,13 @@
 from django.db import models
 from complaints.models import Complaint
 class Detection(models.Model):
-    complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name="detections")
+    complaint = models.ForeignKey(
+    Complaint,
+    on_delete=models.CASCADE,
+    null=True,
+    blank=True,
+    related_name="detections"
+)
 
     # Mobile scanner info
     deviceId = models.CharField(max_length=100, null=True, blank=True)

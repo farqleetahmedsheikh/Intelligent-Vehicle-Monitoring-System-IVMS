@@ -22,6 +22,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminComplaints from "./pages/admin/AdminComplaint";
 import ConfigureCamera from "./pages/admin/ConfigureCamera";
 import AlertDetailsPage from "./pages/common/AlertDetailsPage";
+import UnknownVehiclesPage from "./pages/admin/UnknownVehiclesPage";
+import DetectionsPage from "./pages/common/DetectionsPage";
+import DetectionDetailsPage from "./pages/common/DetectionDetailsPage";
 
 const renderSharedDashboardRoutes = () => (
   <>
@@ -32,6 +35,8 @@ const renderSharedDashboardRoutes = () => (
     <Route path="vehicle-details/:id" element={<VehicleDetailsPage />} />
     <Route path="alerts" element={<AlertsPage />} />
     <Route path="edit-profile" element={<EditProfile />} />
+    <Route path="detections" element={<DetectionsPage />} />
+    <Route path="detections/:id" element={<DetectionDetailsPage />} />
   </>
 );
 
@@ -62,6 +67,7 @@ function App() {
             <Route path="camera/configure" element={<ConfigureCamera />} />
             <Route path="my-complaints" element={<AdminComplaints />} />
             <Route path="alerts/:alertId" element={<AlertDetailsPage />} />
+            <Route path="unknown-vehicles" element={<UnknownVehiclesPage />} />
           </Route>
         </Route>
         <Route path="*" element={<NotFound />} />

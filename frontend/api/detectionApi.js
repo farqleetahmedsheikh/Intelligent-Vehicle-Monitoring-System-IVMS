@@ -27,3 +27,17 @@ export const fetchDetections = async (role) => {
 export const getDetectionDetails = async (id) => {
     return axios.get(`${API_BASE}detections/${id}/`);
 };
+
+// Fetch unknown vehicles (admin only)
+export const fetchUnknownVehicles = async () => {
+    try {
+        const res = await axios.get(`${API_BASE}unknown-vehicles/`, {
+            params: { role: "admin" },
+        });
+
+        return res.data;
+    } catch (error) {
+        console.error("Error fetching unknown vehicles:", error);
+        throw error;
+    }
+};

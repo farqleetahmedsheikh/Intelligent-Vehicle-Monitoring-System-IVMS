@@ -1,0 +1,75 @@
+/* Container grid */
+.detections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Card */
+.detection-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
+    border: 1px solid #eee;
+}
+
+.detection-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Info text */
+.detection-info p {
+    margin: 6px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.detection-info strong {
+    color: #111;
+}
+
+/* ================= IMAGE STYLING ================= */
+
+.detection-image {
+    width: 100%;
+    height: 180px;
+    margin-top: 12px;
+    border-radius: 10px;
+
+    /* makes image look good */
+    object-fit: cover;
+
+    /* subtle styling */
+    border: 1px solid #ddd;
+    background: #f5f5f5;
+
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* hover effect */
+.detection-image:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* optional: fallback if no image */
+.detection-image::after {
+    content: "No Image";
+    display: none;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+    .detections-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detection-image {
+        height: 200px;
+    }
+}

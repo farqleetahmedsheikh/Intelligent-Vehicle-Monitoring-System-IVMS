@@ -42,6 +42,7 @@ urlpatterns = [
 
     path("detect/", DetectVehicleAPIView.as_view(), name="detect_vehicle"),
     path("detections/", DetectVehicleAPIView.as_view(), name="detections"),
+    path("detections/<int:id>/", DetectVehicleAPIView.as_view()),
     path("unknown-vehicles/", AdminUnknownVehiclesAPIView.as_view(), name="unknown-vehicles"),
 ]
 
