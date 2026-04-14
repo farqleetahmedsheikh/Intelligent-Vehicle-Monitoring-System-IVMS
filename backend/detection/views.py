@@ -18,7 +18,7 @@ from complaints.models import Complaint
 from ai_module.plate_detector import detect_plate_and_read
 from users.models import CustomUser
 from .models import Detection, UnknownVehicle
-# from .utils.route_prediction import predict_routes
+from .utils.route_prediction import predict_routes
 
 
 # Folder for detected vehicle images
@@ -75,7 +75,14 @@ class DetectVehicleAPIView(APIView):
                 f.write(chunk)
 
         try:
-            plate, _ = detect_plate_and_read(temp_path)
+            result = detect_plate_and_read(temp_path)
+            plate = None
+            if result:
+                plate = result
+
+            if plate:
+                plate = str(plate).replace(" ", "").replace("-", "").upper()
+            print("Detected plate:", plate)
 
             # =========================================================
             # 🚗 IF NO PLATE → SAVE UNKNOWN VEHICLE
@@ -107,8 +114,8 @@ class DetectVehicleAPIView(APIView):
                 unknown = UnknownVehicle.objects.create(
                     vehicleColor=color,
                     locationText="Camera 1 - Parking Area",
-                    latitude=24.8607,
-                    longitude=67.0011,
+                    latitude=latitude,
+                    longitude=longitude,
                 )
 
                 unknown.image.save(filename, ContentFile(image_bytes), save=True)
@@ -116,7 +123,9 @@ class DetectVehicleAPIView(APIView):
                 return Response({
                     "status": "unknown_vehicle_saved",
                     "color": color,
-                    "id": unknown.id
+                    "id": unknown.id,
+                    "latitude": latitude,
+                    "longitude": longitude,
                 })
 
             # =========================================================
@@ -146,7 +155,7 @@ class DetectVehicleAPIView(APIView):
             image_bytes = buffer.tobytes()
 
             detection.detectedImage.save(plate_filename, ContentFile(image_bytes), save=True)
-            # routes = predict_routes(latitude, longitude)
+            routes = predict_routes(latitude, longitude)
 
             # If vehicle is stolen → send email
             if complaint:
@@ -154,21 +163,57 @@ class DetectVehicleAPIView(APIView):
                 return Response({
                     "status": "stolen_vehicle_detected",
                     "plate": plate,
-                    "complaint_id": complaint.id
+                    "complaint_id": complaint.id,
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "routes": routes
                 })
 
             return Response({
                 "status": "vehicle_not_reported",
                 "plate": plate,
-                "routes": "routes"
+                "routes": routes
             })
 
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
 
-    # ================== GET (LIST DETECTIONS) ==================
-    def get(self, request):
+    # ================== GET (LIST + DETAIL) ==================
+    def get(self, request, id=None):
+        """
+        If id is provided → return single detection with routes
+        If not → return list
+        """
+
+        # ================== DETAIL VIEW ==================
+        if id is not None:
+            try:
+                detection = Detection.objects.select_related("complaint").get(id=id)
+            except Detection.DoesNotExist:
+                return Response({"error": "Not found"}, status=404)
+
+            complaint = detection.complaint
+
+            data = {
+                "id": detection.id,
+                "plateNumber": complaint.plateNumber if complaint else None,
+                "vehicleModel": complaint.vehicleModel if complaint else None,
+                "vehicleColor": complaint.vehicleColor if complaint else None,
+                "status": complaint.status if complaint else "Detected",
+                "detectedAt": detection.detectedAt,
+                "ownerName": complaint.ownerName if complaint else None,
+                "ownerEmail": complaint.ownerEmail if complaint else None,
+                "location": detection.locationText,
+                "latitude": detection.latitude,
+                "longitude": detection.longitude,
+                "image": detection.detectedImage.url if detection.detectedImage else None,
+                "routes": predict_routes(detection.latitude, detection.longitude),
+            }
+
+            return Response(data)
+
+        # ================== LIST VIEW ==================
         role = request.query_params.get("role", "").lower()
         email = request.query_params.get("email", "").lower()
 
@@ -180,6 +225,7 @@ class DetectVehicleAPIView(APIView):
             ).order_by("-detectedAt")
 
         data = []
+
         for d in detections:
             complaint = d.complaint
 
@@ -195,10 +241,11 @@ class DetectVehicleAPIView(APIView):
                 "location": d.locationText,
                 "latitude": d.latitude,
                 "longitude": d.longitude,
+                "image": d.detectedImage.url if d.detectedImage else None,
             })
 
         return Response(data)
-    
+   
 class AdminUnknownVehiclesAPIView(APIView):
     permission_classes = [AllowAny]  # same as your Detect API
 

@@ -1,38 +1,42 @@
-# import googlemaps
-# from django.conf import settings
+import openrouteservice
+from django.conf import settings
 
-# gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+client = openrouteservice.Client(key=settings.OPENROUTE_API_KEY)
 
 
-# def predict_routes(origin_lat, origin_lng):
-#     origin = (origin_lat, origin_lng)
+def predict_routes(lat, lng):
+    origin = [lng, lat]  # ORS uses [lng, lat]
 
-#     # Possible directions (simulate escape paths)
-#     destinations = [
-#         (origin_lat + 0.05, origin_lng),      # north
-#         (origin_lat - 0.05, origin_lng),      # south
-#         (origin_lat, origin_lng + 0.05),      # east
-#         (origin_lat, origin_lng - 0.05),      # west
-#     ]
+    # Simulated escape directions
+    destinations = [
+        [lng + 0.02, lat],   # east
+        [lng - 0.02, lat],   # west
+        [lng, lat + 0.02],   # north
+        [lng, lat - 0.02],   # south
+    ]
 
-#     routes_data = []
+    routes = []
 
-#     for dest in destinations:
-#         directions = gmaps.directions(
-#             origin,
-#             dest,
-#             mode="driving",
-#             departure_time="now"
-#         )
+    for dest in destinations:
+        try:
+            result = client.directions(
+                coordinates=[origin, dest],
+                profile="driving-car",
+                format="geojson"
+            )
 
-#         if directions:
-#             route = directions[0]
+            route = result["features"][0]
 
-#             routes_data.append({
-#                 "summary": route["summary"],
-#                 "distance": route["legs"][0]["distance"]["text"],
-#                 "duration": route["legs"][0]["duration"]["text"],
-#                 "polyline": route["overview_polyline"]["points"],
-#             })
+            summary = route["properties"]["summary"]
+            geometry = route["geometry"]
 
-#     return routes_data
+            routes.append({
+                "distance": round(summary["distance"] / 1000, 2),  # km
+                "duration": round(summary["duration"] / 60, 2),   # mins
+                "geometry": geometry,  # full path
+            })
+
+        except Exception as e:
+            print("ORS error:", e)
+
+    return routes

@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-_l7s7f@0zdio_mb)t74b%r#aw6%sg1s%+vjt86w81%q=#68doo
 DEBUG = True
 
 ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost', '10.99.177.55']
-GOOGLE_MAPS_API_KEY = "your_api_key_here"
+OPENROUTE_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjQ4Y2MxNzM1ZGNkYjRiOGM4MGQ3ODFlYmFhZDVmMmJjIiwiaCI6Im11cm11cjY0In0="
 
 
 # Application definition
