@@ -6,6 +6,7 @@ import 'package:track_vision/shared/models/complaint_model.dart';
 import 'package:track_vision/shared/models/detection_model.dart';
 import 'package:track_vision/shared/models/alert_model.dart';
 import 'package:track_vision/shared/models/route_model.dart';
+import 'package:track_vision/shared/models/unknown_vehicle_model.dart';
 
 // API Services with Automatic Fallback Detection
 class AuthServices {
@@ -435,6 +436,29 @@ class AuthServices {
     return [];
   }
 
+  // Get unknown vehicles for admin users
+  static Future<List<UnknownVehicle>> getUnknownVehicles(String role) async {
+    final result = await _get('/unknown-vehicles/?role=$role');
+    if (result['success']) {
+      final data = result['data'];
+      if (data is List) {
+        return data
+            .map(
+              (item) => UnknownVehicle.fromJson(item as Map<String, dynamic>),
+            )
+            .toList();
+      }
+      if (data is Map && data['data'] is List) {
+        return (data['data'] as List)
+            .map(
+              (item) => UnknownVehicle.fromJson(item as Map<String, dynamic>),
+            )
+            .toList();
+      }
+    }
+    return [];
+  }
+
   // Create detection (when camera captures vehicle)
   static Future<Map<String, dynamic>> createDetection(Detection detection) {
     return _post('/detections/', detection.toJson());
@@ -481,6 +505,55 @@ class AuthServices {
     if (result['success']) {
       final data = result['data'] as List;
       return data.map((item) => PredictionRoute.fromJson(item)).toList();
+    }
+    return [];
+  }
+
+  // Fetch all detections (with role-based filtering)
+  static Future<List<Detection>> fetchDetections() async {
+    try {
+      final userEmail = getUserEmail();
+      final result = await _get('/detections/?role=admin&email=$userEmail');
+      if (result['success']) {
+        final data = result['data'];
+        if (data is List) {
+          return data.map((item) => Detection.fromJson(item)).toList();
+        }
+      }
+    } catch (e) {
+      print('Error fetching detections: $e');
+    }
+    return [];
+  }
+
+  // Get single detection details
+  static Future<Detection?> getDetectionDetails(int id) async {
+    try {
+      final result = await _get('/detections/$id/');
+      if (result['success']) {
+        final data = result['data'];
+        if (data is Map<String, dynamic>) {
+          return Detection.fromJson(data);
+        }
+      }
+    } catch (e) {
+      print('Error fetching detection details: $e');
+    }
+    return null;
+  }
+
+  // Fetch unknown vehicles (admin only)
+  static Future<List<UnknownVehicle>> fetchUnknownVehicles() async {
+    try {
+      final result = await _get('/unknown-vehicles/?role=admin');
+      if (result['success']) {
+        final data = result['data'];
+        if (data is List) {
+          return data.map((item) => UnknownVehicle.fromJson(item)).toList();
+        }
+      }
+    } catch (e) {
+      print('Error fetching unknown vehicles: $e');
     }
     return [];
   }

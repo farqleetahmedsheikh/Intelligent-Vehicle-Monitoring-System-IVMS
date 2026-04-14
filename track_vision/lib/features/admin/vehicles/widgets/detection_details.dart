@@ -20,14 +20,14 @@ class DetectionDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Car image
-            if (detection.detectedImage != null)
+            if (detection.image != null)
               Container(
                 height: 180,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   image: DecorationImage(
-                    image: NetworkImage(detection.detectedImage!),
+                    image: NetworkImage(detection.image!),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -49,26 +49,14 @@ class DetectionDetailPage extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Detection ID
-            Text(
-              'Detection #${detection.id}',
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Time ago
-            Text(
-              timeago.format(detection.detectedAt),
-              style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
-            ),
-
-            const SizedBox(height: 20),
-
             // Detection Details
-            _buildInfoCard('Complaint ID', detection.complaintId.toString()),
-            _buildInfoCard('Device ID', detection.deviceId ?? 'N/A'),
-            _buildInfoCard('Location', detection.locationText ?? 'N/A'),
+            _buildInfoCard('Plate Number', detection.plateNumber ?? 'Unknown'),
+            _buildInfoCard('Vehicle Model', detection.vehicleModel ?? 'N/A'),
+            _buildInfoCard('Vehicle Color', detection.vehicleColor ?? 'N/A'),
+            _buildInfoCard('Status', detection.status ?? 'Detected'),
+            _buildInfoCard('Location', detection.location ?? 'N/A'),
+            _buildInfoCard('Owner Name', detection.ownerName ?? 'N/A'),
+            _buildInfoCard('Owner Email', detection.ownerEmail ?? 'N/A'),
             if (detection.latitude != null && detection.longitude != null)
               _buildInfoCard(
                 'Coordinates',

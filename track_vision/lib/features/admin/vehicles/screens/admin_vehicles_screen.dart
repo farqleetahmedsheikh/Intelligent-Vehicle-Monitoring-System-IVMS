@@ -77,19 +77,22 @@ class _AdminVehiclesState extends ConsumerState<AdminVehicles> {
                   ),
                 ),
                 data: (detections) {
-                  // Filter detections - using deviceId for search since plateNumber doesn't exist
+                  // Filter detections
                   var filtered = detections.where((d) {
                     final matchesSearch =
                         _searchQuery.isEmpty ||
-                        (d.deviceId?.toLowerCase().contains(
+                        (d.plateNumber?.toLowerCase().contains(
                               _searchQuery.toLowerCase(),
                             ) ??
                             false) ||
-                        (d.locationText?.toLowerCase().contains(
+                        (d.vehicleModel?.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ) ??
+                            false) ||
+                        (d.location?.toLowerCase().contains(
                               _searchQuery.toLowerCase(),
                             ) ??
                             false);
-                    // Note: Detection model doesn't have status field, showing all
                     return matchesSearch;
                   }).toList();
 
@@ -121,11 +124,11 @@ class _AdminVehiclesState extends ConsumerState<AdminVehicles> {
                                 color: AppColors.accentBlue,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: detection.detectedImage != null
+                              child: detection.image != null
                                   ? ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.network(
-                                        detection.detectedImage!,
+                                        detection.image!,
                                         fit: BoxFit.cover,
                                         errorBuilder: (_, __, ___) =>
                                             const Icon(
@@ -142,7 +145,7 @@ class _AdminVehiclesState extends ConsumerState<AdminVehicles> {
                                     ),
                             ),
                             title: Text(
-                              'Detection #${detection.id}',
+                              'Plate: ${detection.plateNumber ?? "Unknown"}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -151,10 +154,16 @@ class _AdminVehiclesState extends ConsumerState<AdminVehicles> {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text(
+                                  'Model: ${detection.vehicleModel ?? "N/A"}',
+                                ),
+                                Text(
+                                  'Status: ${detection.status ?? "Detected"}',
+                                ),
                                 Text(timeago.format(detection.detectedAt)),
-                                if (detection.locationText != null)
+                                if (detection.location != null)
                                   Text(
-                                    detection.locationText!,
+                                    detection.location!,
                                     style: const TextStyle(fontSize: 12),
                                   ),
                               ],

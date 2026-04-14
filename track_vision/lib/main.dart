@@ -5,6 +5,7 @@ import 'package:track_vision/features/admin/alerts/screens/admin_alerts_screen.d
 import 'package:track_vision/shared/widgets/admin_bottom_navbar.dart';
 import 'package:track_vision/features/admin/dashboard/screens/admin_dashboard_screen.dart';
 import 'package:track_vision/features/admin/vehicles/screens/admin_vehicles_screen.dart';
+import 'package:track_vision/features/admin/vehicles/screens/admin_unknown_vehicles_screen.dart';
 import 'package:track_vision/features/auth/screens/forgot_password_screen.dart';
 import 'package:track_vision/features/auth/screens/login_screen.dart';
 import 'package:track_vision/features/auth/screens/reset_password_screen.dart';
@@ -63,6 +64,10 @@ class _MyAppState extends ConsumerState<MyApp> {
             return MaterialPageRoute(builder: (_) => const AdminDashboard());
           case '/admin-vehicles/':
             return MaterialPageRoute(builder: (_) => const AdminVehicles());
+          case '/admin-unknown-vehicles/':
+            return MaterialPageRoute(
+              builder: (_) => const AdminUnknownVehiclesScreen(),
+            );
           case '/admin_alerts/':
             return MaterialPageRoute(builder: (_) => const AdminAlerts());
           case '/admin-bottomNavbar/':

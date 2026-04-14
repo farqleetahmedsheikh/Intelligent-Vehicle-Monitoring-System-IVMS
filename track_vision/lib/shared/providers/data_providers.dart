@@ -5,6 +5,8 @@ import 'package:track_vision/shared/models/complaint_model.dart';
 import 'package:track_vision/shared/models/detection_model.dart';
 import 'package:track_vision/shared/models/alert_model.dart';
 import 'package:track_vision/shared/models/route_model.dart';
+import 'package:track_vision/shared/models/unknown_vehicle_model.dart';
+import 'package:track_vision/shared/providers/auth_notifier.dart';
 
 // ============= COMPLAINT PROVIDERS =============
 
@@ -29,11 +31,24 @@ final detectionsByComplaintProvider =
       return AuthServices.getDetections(complaintId);
     });
 
-// Get all detections (mock provider - backend doesn't have this endpoint yet)
+// Get all detections
 final detectionsProvider = FutureProvider<List<Detection>>((ref) async {
-  // For now, return empty list since backend doesn't have /detections/ endpoint
-  // In production, this would call AuthServices.getAllDetections()
-  return [];
+  return AuthServices.fetchDetections();
+});
+
+// Get single detection details
+final detectionDetailProvider = FutureProvider.family<Detection?, int>((
+  ref,
+  detectionId,
+) async {
+  return AuthServices.getDetectionDetails(detectionId);
+});
+
+// Get unknown vehicles
+final unknownVehiclesProvider = FutureProvider<List<UnknownVehicle>>((
+  ref,
+) async {
+  return AuthServices.fetchUnknownVehicles();
 });
 
 // ============= ALERT PROVIDERS =============

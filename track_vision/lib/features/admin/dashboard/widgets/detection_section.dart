@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:track_vision/features/admin/vehicles/widgets/detection_details.dart';
+import 'package:track_vision/features/common/screens/detections_page.dart';
 import 'package:track_vision/shared/providers/data_providers.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -126,6 +127,18 @@ class _DetectionSectionState extends ConsumerState<DetectionSection> {
                 ),
               );
             },
+          ),
+        ),
+        const SizedBox(height: 10),
+        Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DetectionsPage()),
+              );
+            },
+            child: const Text('View All Detections'),
           ),
         ),
       ],

@@ -4,6 +4,7 @@ import 'package:track_vision/shared/widgets/admin_appbar.dart';
 import 'package:track_vision/features/admin/camera/screens/admin_camera_screen.dart';
 import 'package:track_vision/features/admin/complaints/screens/admin_complaints_screen.dart';
 import 'package:track_vision/features/admin/dashboard/screens/admin_dashboard_screen.dart';
+import 'package:track_vision/features/admin/vehicles/screens/admin_unknown_vehicles_screen.dart';
 import 'package:track_vision/features/admin/complaints/screens/admin_complaints_list_screen.dart';
 import 'package:track_vision/features/auth/providers/admin_provider.dart';
 import 'package:track_vision/core/config/constants.dart';
@@ -18,6 +19,7 @@ class AdminBottomNavbar extends ConsumerStatefulWidget {
 class _AdminBottomNavbarState extends ConsumerState<AdminBottomNavbar> {
   final List<IconData> _icons = [
     Icons.home_outlined,
+    Icons.warning_amber_outlined,
     Icons.feedback_outlined,
     Icons.info_outlined,
     Icons.camera_alt_outlined,
@@ -25,6 +27,7 @@ class _AdminBottomNavbarState extends ConsumerState<AdminBottomNavbar> {
 
   final List<String> _labels = [
     'Home',
+    'Unknowns',
     'Complaints',
     'Manage Complaints',
     'Camera',
@@ -36,6 +39,7 @@ class _AdminBottomNavbarState extends ConsumerState<AdminBottomNavbar> {
 
     final adminPages = [
       AdminDashboard(),
+      const AdminUnknownVehiclesScreen(),
       AdminComplains(),
       AdminComplaintsListScreen(),
       AdminCamera(),
