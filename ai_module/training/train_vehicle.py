@@ -9,9 +9,9 @@ def train_all_experiments():
     exps = ["exp_60", "exp_70", "exp_80"]
 
     # Load model ONCE (faster + correct)
-    model = YOLO("yolo11n.pt")
 
     for exp in exps:
+        model = YOLO("yolo11n.pt")
         print(f"\n🚀 Training on {exp}...\n")
 
         data_yaml = f"datasets/{exp}/data.yaml"
@@ -34,10 +34,14 @@ names: ["car", "person", "bike"]
         # =========================
         model.train(
             data=data_yaml,
-            epochs=50,
+            epochs=2,
+            patience=10,
+            augment=True,
             imgsz=640,
-            batch=8,
+            batch=4,
+            workers=2,
             device="cpu",   # change to 0 if GPU available
+            cache=True,
             project="runs/vehicle",
             name=exp,
             exist_ok=True
