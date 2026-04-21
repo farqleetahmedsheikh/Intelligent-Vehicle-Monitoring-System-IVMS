@@ -34,7 +34,7 @@ names: ["car", "person", "bike"]
         # =========================
         model.train(
             data=data_yaml,
-            epochs=2,
+            epochs=50,
             patience=10,
             augment=True,
             imgsz=640,
