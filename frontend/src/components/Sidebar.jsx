@@ -42,6 +42,16 @@ const Sidebar = () => {
             <BadgeAlert size={18} /> {role === "admin" ? "Manage Complaints" : "My Complaints"}
           </NavLink>
         </li>
+        {role === "admin" && <li>
+          <NavLink
+            to={`/${role}/dashboard/verify-complains`}
+            className={({ isActive }) =>
+              isActive ? "sidebar-link active" : "sidebar-link"
+            }
+          >
+            <MessageSquareWarning size={18} /> Verify Complaints
+          </NavLink>
+        </li>}
 
         <li>
           <NavLink

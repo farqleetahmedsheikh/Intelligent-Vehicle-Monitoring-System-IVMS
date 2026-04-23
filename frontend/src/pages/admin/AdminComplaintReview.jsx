@@ -5,171 +5,147 @@ import axios from "axios";
 import "../../styles/AdminReview.css";
 import Loader from "../../components/Loader";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/";
+const API_BASE =
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/";
 
 export default function AdminComplaintReview() {
-  const [complaintId, setComplaintId] = useState("");
-  const [complaint, setComplaint] = useState(null);
-  const [exciseData, setExciseData] = useState(null);
+  const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // =========================
-  // FETCH SINGLE COMPLAINT
-  // =========================
-  const fetchComplaint = async () => {
-    if (!complaintId) return;
+  const [statusFilter, setStatusFilter] = useState("pending");
+  const [search, setSearch] = useState("");
 
+  // =========================
+  // FETCH ALL COMPLAINTS + EXCISE
+  // =========================
+  const fetchComplaints = async () => {
     setLoading(true);
+
     try {
-      const res = await axios.get(`${API_BASE}complaints/${complaintId}/`);
-      setComplaint(res.data);
-      setExciseData(null);
-    } catch (err) {
-      console.error("Complaint not found", err);
-      setComplaint(null);
-    }
-    setLoading(false);
-  };
-
-  // =========================
-  // VERIFY WITH EXCISE API
-  // =========================
-  const verifyVehicle = async () => {
-    if (!complaint) return;
-
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_BASE}complaints/admin-verify/`, {
-        params: {
-          plate: complaint.plateNumber,
-          chassis: complaint.chassisNumber,
-          role: "admin",
-        },
-      });
-
-      setExciseData(res.data.excise_data);
-    } catch (err) {
-      console.error("Verification failed", err);
-    }
-    setLoading(false);
-  };
-
-  // =========================
-  // UPDATE STATUS
-  // =========================
-  const updateStatus = async (status) => {
-    if (!complaint) return;
-
-    setLoading(true);
-    try {
-      await axios.patch(
-        `${API_BASE}complaints/update-status/${complaint.id}/`,
-        {
-          status,
-          role: "admin",
-          email: "admin@system.com",
-        },
+      const res = await axios.get(
+        `${API_BASE}complaints/?include_excise=true`
       );
 
-      fetchComplaint();
+      const list = res.data.complaints || [];
+      setComplaints(list);
+
     } catch (err) {
-      console.error("Status update failed", err);
+      console.error("Failed to fetch complaints", err);
+      setComplaints([]);
     }
+
     setLoading(false);
   };
 
   useEffect(() => {
-    if (complaintId) fetchComplaint();
+    fetchComplaints();
   }, []);
+
+  // =========================
+  // UPDATE STATUS
+  // =========================
+  const updateStatus = async (id, status) => {
+    try {
+      await axios.patch(
+        `${API_BASE}complaints/update-status/${id}/`,
+        {
+          status,
+          role: "admin",
+          email: "admin@system.com",
+        }
+      );
+
+      fetchComplaints();
+    } catch (err) {
+      console.error("Status update failed", err);
+    }
+  };
+
+  // =========================
+  // FILTER LOGIC
+  // =========================
+  const filtered = complaints
+    .filter((c) =>
+      statusFilter ? c.status === statusFilter : true
+    )
+    .filter((c) =>
+      c.chassisNumber?.toLowerCase().includes(search.toLowerCase()) ||
+      c.plateNumber?.toLowerCase().includes(search.toLowerCase())
+    );
 
   if (loading) return <Loader />;
 
   return (
     <div className="admin-review-page">
-      <h2>Complaint Review Panel</h2>
+      <h2>Complaint Management Dashboard</h2>
 
-      {/* SEARCH BAR */}
+      {/* SEARCH */}
       <div className="search-box">
         <input
-          type="number"
-          placeholder="Enter Complaint ID..."
-          value={complaintId}
-          onChange={(e) => setComplaintId(e.target.value)}
+          type="text"
+          placeholder="Search by name or plate..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
-        <button onClick={fetchComplaint}>Search</button>
       </div>
+      <div className="complaints-grid">
+        {/* LIST */}
+        {filtered.length === 0 ? (
+          <p className="no-data">No complaints found</p>
+        ) : (
+          filtered.map((c) => (
+            <div key={c.id} className="review-card">
 
-      {/* NO DATA */}
-      {!complaint && complaintId && (
-        <p className="no-data">No complaint found</p>
-      )}
+              <h3>Complaint #{c.id}</h3>
 
-      {/* COMPLAINT DETAILS */}
-      {complaint && (
-        <div className="review-card">
-          <h3>Complaint #{complaint.id}</h3>
+              {/* COMPLAINT INFO */}
+              <div className="info-grid">
+                <div>
+                  <p><strong>Owner:</strong> {c.ownerName}</p>
+                  <p><strong>Plate:</strong> {c.plateNumber}</p>
+                  <p><strong>Chassis:</strong> {c.chassisNumber}</p>
+                </div>
 
-          <div className="info-grid">
-            <div>
-              <p>
-                <strong>Owner:</strong> {complaint.ownerName}
-              </p>
-              <p>
-                <strong>Email:</strong> {complaint.ownerEmail}
-              </p>
-              <p>
-                <strong>Phone:</strong> {complaint.ownerPhone}
-              </p>
+                <div>
+                  <p><strong>Status:</strong> {c.status}</p>
+                </div>
+              </div>
+
+              {/* EXCISE DATA (NOW FROM BACKEND) */}
+              <div className="excise-box">
+                <h4>Excise Record</h4>
+
+                {c.excise ? (
+                  <>
+                    <p><strong>Make:</strong> {c.excise.make}</p>
+                    <p><strong>Model:</strong> {c.excise.model}</p>
+                    <p><strong>Engine:</strong> {c.excise.engine_number}</p>
+                    <p><strong>Year:</strong> {c.excise.manufacture_year}</p>
+                  </>
+                ) : (
+                  <p style={{ color: "red" }}>
+                    No excise match found
+                  </p>
+                )}
+              </div>
+
+              {/* ACTIONS */}
+              <div className="actions">
+                <button onClick={() => updateStatus(c.id, "investigating")}>
+                  Investigate
+                </button>
+
+                <button
+                  className="reject"
+                  onClick={() => updateStatus(c.id, "rejected")}
+                >
+                  Reject
+                </button>
+              </div>
             </div>
-
-            <div>
-              <p>
-                <strong>Vehicle:</strong> {complaint.vehicleModel}
-              </p>
-              <p>
-                <strong>Plate:</strong> {complaint.plateNumber?.toUpperCase()}
-              </p>
-              <p>
-                <strong>Chassis:</strong> {complaint.chassisNumber}
-              </p>
-            </div>
-          </div>
-
-          <div className="status-box">
-            <p>
-              <strong>Status:</strong> <span>{complaint.status}</span>
-            </p>
-          </div>
-
-          {/* ACTIONS */}
-          <div className="actions">
-            <button onClick={verifyVehicle}>Verify with Excise</button>
-
-            <button onClick={() => updateStatus("investigating")}>
-              Investigate
-            </button>
-
-            <button
-              className="approve"
-              onClick={() => updateStatus("approved")}
-            >
-              Approve
-            </button>
-
-            <button className="reject" onClick={() => updateStatus("rejected")}>
-              Reject
-            </button>
-          </div>
-
-          {/* EXCISE DATA */}
-          {exciseData && (
-            <div className="excise-box">
-              <h4>Excise Verification</h4>
-              <pre>{JSON.stringify(exciseData, null, 2)}</pre>
-            </div>
-          )}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 }

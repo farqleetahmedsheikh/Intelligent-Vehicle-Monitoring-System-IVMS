@@ -13,7 +13,7 @@ VEHICLE_PICTURES_ROOT = Path(__file__).resolve().parent.parent / "vehicle_pictur
 DETECTED_VEHICLE_PICTURES_ROOT = Path(__file__).resolve().parent.parent / "vehicle_pictures"
 
 # Import complaint views
-from complaints.views import register_complaint, search_complaint, complaint_list, get_complaint, update_complaint_status, get_all_complaints
+from complaints.views import register_complaint, search_complaint, complaint_list, get_complaint, update_complaint_status, get_all_complaints, get_complaint_with_excise
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -48,6 +48,7 @@ urlpatterns = [
     
     path("add-vehicle/", VehicleCreateView.as_view()),
     path("search-vehicle/", VehicleSearchView.as_view()),
+    path("complaints/excise/<int:complaint_id>/", get_complaint_with_excise ),
 ]
 
 if settings.DEBUG:

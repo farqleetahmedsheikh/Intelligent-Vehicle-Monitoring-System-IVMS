@@ -9,6 +9,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.utils.timezone import now
+from vehicles.models import Vehicle
+from vehicles.serializers import VehicleSerializer
 
 import requests
 import logging
@@ -129,13 +131,19 @@ def search_complaint(request):
 @api_view(['GET'])
 def complaint_list(request):
     email = request.GET.get('email')
+    include_excise = request.GET.get('include_excise') == 'true'
+    status_filter = request.GET.get('status')
+
     page = int(request.GET.get('page', 1))
     limit = min(int(request.GET.get('limit', 10)), 50)
 
+    qs = Complaint.objects.all()
+
     if email:
-        qs = Complaint.objects.filter(ownerEmail=email)
-    else:
-        qs = Complaint.objects.all()
+        qs = qs.filter(ownerEmail=email)
+
+    if status_filter:
+        qs = qs.filter(status=status_filter)
 
     qs = qs.order_by('-createdAt')
 
@@ -147,15 +155,36 @@ def complaint_list(request):
         page_obj = paginator.page(1)
 
     serializer = ComplaintSerializer(page_obj.object_list, many=True)
+    complaints = serializer.data
+
+    # =========================
+    # EXCISE ENRICHMENT (FAST + BULK)
+    # =========================
+    if include_excise:
+        plate_list = [c["plateNumber"] for c in complaints]
+        chassis_list = [c["chassisNumber"] for c in complaints]
+
+        vehicles = Vehicle.objects.filter(
+            Q(number_plate__in=plate_list) |
+            Q(chassis_number__in=chassis_list)
+        )
+
+        vehicle_map = {}
+        for v in vehicles:
+            vehicle_map[(v.number_plate, v.chassis_number)] = v
+
+        for c in complaints:
+            key = (c["plateNumber"], c["chassisNumber"])
+            v = vehicle_map.get(key)
+            c["excise"] = VehicleSerializer(v).data if v else None
 
     return Response({
         "total": paginator.count,
         "page": page,
         "limit": limit,
         "totalPages": paginator.num_pages,
-        "complaints": serializer.data
+        "complaints": complaints
     })
-
 
 # =========================================================
 # 4. GET SINGLE COMPLAINT
@@ -167,8 +196,15 @@ def get_complaint(request, complaint_id):
     except Complaint.DoesNotExist:
         return Response({"error": "Complaint not found"}, status=404)
 
-    return Response(ComplaintSerializer(complaint).data)
+    vehicle = Vehicle.objects.filter(
+        Q(number_plate__iexact=complaint.plateNumber) |
+        Q(chassis_number__iexact=complaint.chassisNumber)
+    ).first()
 
+    data = ComplaintSerializer(complaint).data
+    data["excise"] = VehicleSerializer(vehicle).data if vehicle else None
+
+    return Response(data)
 
 # =========================================================
 # 5. ADMIN: VEHICLE VERIFICATION (EXCISE LOOKUP)
@@ -244,6 +280,26 @@ def update_complaint_status(request, id):
         "status": complaint.status
     })
 
+@api_view(['GET'])
+def get_complaint_with_excise(request, complaint_id):
+
+    try:
+        complaint = Complaint.objects.get(id=complaint_id)
+    except Complaint.DoesNotExist:
+        return Response({"error": "Complaint not found"}, status=404)
+
+    # =========================
+    # MATCH EXCISE VEHICLE
+    # =========================
+    vehicle = Vehicle.objects.filter(
+        Q(number_plate__iexact=complaint.plateNumber) |
+        Q(chassis_number__iexact=complaint.chassisNumber)
+    ).first()
+
+    return Response({
+        "complaint": ComplaintSerializer(complaint).data,
+        "excise": VehicleSerializer(vehicle).data if vehicle else None
+    })
 
 # =========================================================
 # 7. OPTIONAL: GET ALL (ADMIN ONLY SHOULD USE THIS)

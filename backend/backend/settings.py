@@ -111,7 +111,7 @@ DATABASES = {
         #  'OPTIONS': {
         #     'unix_socket': '/opt/local/var/run/mariadb-10.11/mysqld.sock',
         # },
-        
+        },
         # 🆕 SECOND DATABASE (EXCISE SYSTEM)
     'excise_db': {
         'ENGINE': 'django.db.backends.mysql',
@@ -123,7 +123,6 @@ DATABASES = {
         #  'OPTIONS': {
         #     'unix_socket': '/opt/local/var/run/mariadb-10.11/mysqld.sock',
         # },
-    }
     }
 }
 

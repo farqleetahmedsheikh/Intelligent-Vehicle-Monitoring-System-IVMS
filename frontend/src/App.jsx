@@ -25,6 +25,7 @@ import AlertDetailsPage from "./pages/common/AlertDetailsPage";
 import UnknownVehiclesPage from "./pages/admin/UnknownVehiclesPage";
 import DetectionsPage from "./pages/common/DetectionsPage";
 import DetectionDetailsPage from "./pages/common/DetectionDetailsPage";
+import AdminComplaintReview from "./pages/admin/AdminComplaintReview";
 
 const renderSharedDashboardRoutes = () => (
   <>
@@ -68,6 +69,7 @@ function App() {
             <Route path="my-complaints" element={<AdminComplaints />} />
             <Route path="alerts/:alertId" element={<AlertDetailsPage />} />
             <Route path="unknown-vehicles" element={<UnknownVehiclesPage />} />
+            <Route path="verify-complains" element={<AdminComplaintReview />} />
           </Route>
         </Route>
         <Route path="*" element={<NotFound />} />
