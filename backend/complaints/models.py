@@ -2,6 +2,8 @@ from django.db import models
 
 class Complaint(models.Model):
     STATUS_CHOICES = (
+        ("pending", "Pending"),
+        ("rejected", "Rejected"),
         ("investigating", "Investigating"),
         ("resolved", "Resolved"),
         ("closed", "Closed"),
@@ -24,9 +26,11 @@ class Complaint(models.Model):
 
     # Complaint Info
     complaintDescription = models.TextField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="investigating")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
 
     createdAt = models.DateTimeField(auto_now_add=True)
+    verified_by_email = models.EmailField(null=True, blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.ownerName} — {self.plateNumber}"

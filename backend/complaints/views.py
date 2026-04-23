@@ -1,24 +1,33 @@
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
+from django.utils.timezone import now
+
+import requests
+import logging
+
 from .models import Complaint
 from .serializers import ComplaintSerializer
-import logging
-from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
+# =========================================================
+# 1. REGISTER COMPLAINT (AUTO STATUS = PENDING)
+# =========================================================
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
 def register_complaint(request):
     serializer = ComplaintSerializer(data=request.data)
 
     if serializer.is_valid():
-        complaint = serializer.save()
+        complaint = serializer.save()  # status defaults to "pending"
 
         try:
             html_content = render_to_string("email/complaint_registered.html", {
@@ -42,45 +51,35 @@ def register_complaint(request):
             email_status = "Email sent successfully"
 
         except Exception as e:
-            logger.error(f"Failed to send complaint email: {e}")
-            email_status = "Failed to send email notification"
+            logger.error(f"Email error: {e}")
+            email_status = "Email failed"
 
-        return Response(
-            {
-                "message": "Complaint registered successfully",
-                "email_status": email_status,
-                "data": serializer.data
-            },
-            status=status.HTTP_201_CREATED
-        )
+        return Response({
+            "message": "Complaint registered successfully",
+            "email_status": email_status,
+            "data": serializer.data
+        }, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+# =========================================================
+# 2. SEARCH COMPLAINT (USER / ADMIN FILTERED)
+# =========================================================
 @api_view(['GET'])
 def search_complaint(request):
     query = request.query_params.get('q', '').strip()
     role = request.query_params.get('role')
     email = request.query_params.get('email')
 
-    page = request.query_params.get('page', 1)
-    limit = request.query_params.get('limit', 10)
+    page = int(request.query_params.get('page', 1))
+    limit = min(int(request.query_params.get('limit', 10)), 50)
 
     if not query:
         return Response({"error": "Search query 'q' is required"}, status=400)
 
-    try:
-        page = int(page)
-        limit = int(limit)
-    except ValueError:
-        return Response({"error": "Invalid page or limit"}, status=400)
-
-    page = max(page, 1)
-    limit = min(max(limit, 1), 50)
-
-    complaints = Complaint.objects.none()
-
-    # Detect query type
     clean_query = query.replace('-', '')
+
     is_cnic = clean_query.isdigit() and len(clean_query) in [13, 14]
     is_plate = any(c.isalpha() for c in query) and any(c.isdigit() for c in query)
     is_chassis = len(query) > 10 and query.isalnum()
@@ -100,7 +99,7 @@ def search_complaint(request):
             Q(vehicleModel__icontains=query)
         )
 
-    # Restrict normal users
+    # restrict non-admin users
     if role != "admin":
         complaints = complaints.filter(ownerEmail=email)
 
@@ -109,13 +108,11 @@ def search_complaint(request):
     paginator = Paginator(complaints, limit)
 
     try:
-        complaints_page = paginator.page(page)
-    except PageNotAnInteger:
-        complaints_page = paginator.page(1)
-    except EmptyPage:
-        complaints_page = paginator.page(paginator.num_pages)
+        page_obj = paginator.page(page)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.page(1)
 
-    serializer = ComplaintSerializer(complaints_page.object_list, many=True)
+    serializer = ComplaintSerializer(page_obj.object_list, many=True)
 
     return Response({
         "total": paginator.count,
@@ -125,41 +122,31 @@ def search_complaint(request):
         "complaints": serializer.data
     })
 
+
+# =========================================================
+# 3. LIST COMPLAINTS
+# =========================================================
 @api_view(['GET'])
 def complaint_list(request):
-    userEmail = request.GET.get('email')
-    page = request.GET.get('page', 1)
-    limit = request.GET.get('limit', 10)
+    email = request.GET.get('email')
+    page = int(request.GET.get('page', 1))
+    limit = min(int(request.GET.get('limit', 10)), 50)
 
-    try:
-        page = int(page)
-        limit = int(limit)
-    except ValueError:
-        return Response({"error": "Invalid page or limit"}, status=400)
-
-    # Safety limits
-    page = max(page, 1)
-    limit = min(max(limit, 1), 50)
-
-    # Filter complaints
-    if userEmail:
-        complaints_queryset = Complaint.objects.filter(
-            ownerEmail=userEmail
-        ).order_by('-createdAt')
+    if email:
+        qs = Complaint.objects.filter(ownerEmail=email)
     else:
-        # ⚠️ Ideally check admin role here
-        complaints_queryset = Complaint.objects.all().order_by('-createdAt')
+        qs = Complaint.objects.all()
 
-    paginator = Paginator(complaints_queryset, limit)
+    qs = qs.order_by('-createdAt')
+
+    paginator = Paginator(qs, limit)
 
     try:
-        complaints_page = paginator.page(page)
-    except PageNotAnInteger:
-        complaints_page = paginator.page(1)
-    except EmptyPage:
-        complaints_page = paginator.page(paginator.num_pages)
+        page_obj = paginator.page(page)
+    except:
+        page_obj = paginator.page(1)
 
-    serializer = ComplaintSerializer(complaints_page.object_list, many=True)
+    serializer = ComplaintSerializer(page_obj.object_list, many=True)
 
     return Response({
         "total": paginator.count,
@@ -168,23 +155,65 @@ def complaint_list(request):
         "totalPages": paginator.num_pages,
         "complaints": serializer.data
     })
- 
+
+
+# =========================================================
+# 4. GET SINGLE COMPLAINT
+# =========================================================
 @api_view(['GET'])
 def get_complaint(request, complaint_id):
     try:
         complaint = Complaint.objects.get(id=complaint_id)
     except Complaint.DoesNotExist:
-        return Response({"error": "Complaint not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Complaint not found"}, status=404)
 
-    serializer = ComplaintSerializer(complaint)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(ComplaintSerializer(complaint).data)
 
-@api_view(['GET'])
-def get_all_complaints(request):
-    complaints = Complaint.objects.all().order_by("-id")
-    serializer = ComplaintSerializer(complaints, many=True)
-    return Response(serializer.data)
 
+# =========================================================
+# 5. ADMIN: VEHICLE VERIFICATION (EXCISE LOOKUP)
+# =========================================================
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def admin_verify_vehicle(request):
+    plate = request.query_params.get("plate")
+    chassis = request.query_params.get("chassis")
+
+    if not plate and not chassis:
+        return Response({"error": "plate or chassis required"}, status=400)
+
+    try:
+        complaint = Complaint.objects.get(
+            Q(plateNumber__iexact=plate) |
+            Q(chassisNumber__iexact=chassis)
+        )
+    except Complaint.DoesNotExist:
+        return Response({"error": "Complaint not found"}, status=404)
+
+    # ===============================
+    # EXCISE API (PLACEHOLDER)
+    # ===============================
+    try:
+        # Replace with real API
+        excise_data = {
+            "owner": "Fetched from Excise DB",
+            "status": "Active",
+            "registrationCity": "Rawalpindi",
+            "vehicleVerified": True
+        }
+
+    except Exception as e:
+        excise_data = {"error": "Failed to fetch excise data"}
+
+    return Response({
+        "complaint": ComplaintSerializer(complaint).data,
+        "excise_data": excise_data
+    })
+
+
+# =========================================================
+# 6. ADMIN: UPDATE STATUS (APPROVE / REJECT)
+# =========================================================
 @api_view(["PATCH"])
 def update_complaint_status(request, id):
     try:
@@ -192,7 +221,35 @@ def update_complaint_status(request, id):
     except Complaint.DoesNotExist:
         return Response({"error": "Not found"}, status=404)
 
+    role = request.data.get("role")
+    email = request.data.get("email")
     status_value = request.data.get("status")
+    
+    if role != "admin":
+        return Response({"error": "Only admin can update status"}, status=403)
+
+    if status_value not in ["pending", "investigating", "rejected"]:
+        return Response({"error": "Invalid status"}, status=400)
+
     complaint.status = status_value
+
+    if status_value in ["investigating", "rejected"]:
+        complaint.verified_at = now()
+        complaint.verified_by_email = email
+
     complaint.save()
-    return Response({"success": True})
+
+    return Response({
+        "success": True,
+        "status": complaint.status
+    })
+
+
+# =========================================================
+# 7. OPTIONAL: GET ALL (ADMIN ONLY SHOULD USE THIS)
+# =========================================================
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def get_all_complaints(request):
+    complaints = Complaint.objects.all().order_by("-id")
+    return Response(ComplaintSerializer(complaints, many=True).data)

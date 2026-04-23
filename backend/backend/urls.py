@@ -7,6 +7,7 @@ from django.conf.urls.static import static
 from pathlib import Path
 from detection.views import AdminUnknownVehiclesAPIView, DetectVehicleAPIView
 from alerts.views import AlertDetailView, UserAlertsView
+from vehicles.views import VehicleCreateView, VehicleSearchView
 
 VEHICLE_PICTURES_ROOT = Path(__file__).resolve().parent.parent / "vehicle_pictures"
 DETECTED_VEHICLE_PICTURES_ROOT = Path(__file__).resolve().parent.parent / "vehicle_pictures"
@@ -44,6 +45,9 @@ urlpatterns = [
     path("detections/", DetectVehicleAPIView.as_view(), name="detections"),
     path("detections/<int:id>/", DetectVehicleAPIView.as_view()),
     path("unknown-vehicles/", AdminUnknownVehiclesAPIView.as_view(), name="unknown-vehicles"),
+    
+    path("add-vehicle/", VehicleCreateView.as_view()),
+    path("search-vehicle/", VehicleSearchView.as_view()),
 ]
 
 if settings.DEBUG:

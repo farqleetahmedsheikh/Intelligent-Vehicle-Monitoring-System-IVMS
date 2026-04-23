@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'routes',
     'detection',
     "alerts",
+    'vehicles'
 ]
 
 ASGI_APPLICATION = "backend.asgi.application"
@@ -110,6 +111,19 @@ DATABASES = {
         #  'OPTIONS': {
         #     'unix_socket': '/opt/local/var/run/mariadb-10.11/mysqld.sock',
         # },
+        
+        # 🆕 SECOND DATABASE (EXCISE SYSTEM)
+    'excise_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'excise_db',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+        #  'OPTIONS': {
+        #     'unix_socket': '/opt/local/var/run/mariadb-10.11/mysqld.sock',
+        # },
+    }
     }
 }
 
@@ -177,7 +191,7 @@ ALLOWED_ORGANIZATIONS = {
     "FutureWorks": "FW-7860",
 }
 
-
+DATABASE_ROUTERS = ['backend.db_router.ExciseRouter']
 # Email server configuration
 
 EMAIL_BACKEND = 'backend.unverified_email_backend.UnverifiedSMTPBackend'
